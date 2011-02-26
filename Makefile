@@ -1,4 +1,4 @@
-CC=g++
+	CC=g++
 CFLAGS=-Wall -pedantic
 
 merge:	merge.cpp
@@ -6,3 +6,6 @@ merge:	merge.cpp
 
 clean: 
 	rm -f merge *.o
+
+uncrustify:
+	uncrustify -c /usr/share/uncrustify/linux-indent.cfg --no-backup --replace *.cpp
