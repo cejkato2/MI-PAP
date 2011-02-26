@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-g -Wall -pedantic
+CFLAGS=-fopenmp -g -Wall -pedantic
 
 all: merge.o eomerge
 
