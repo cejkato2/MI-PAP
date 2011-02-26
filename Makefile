@@ -1,13 +1,17 @@
 CC=g++
 CFLAGS=-g -Wall -pedantic
+OMPFLAG=-fopenmp
 
-all: merge.o eomerge
+all: eomerge
 
 merge.o:	merge.cpp
 	$(CC) -c merge.cpp 
 
-eomerge:	merge.o eomerge.cpp
-	$(CC) $(CFLAGS) eomerge.cpp merge.o -o eomerge
+array.o:	array.cpp
+	$(CC) -c array.cpp 
+
+eomerge:	merge.o array.o eomerge.cpp
+	$(CC) $(CFLAGS) $(OMPFLAG) eomerge.cpp merge.o array.o -o eomerge
 
 debug_ms: merge.cpp
 	$(CC) $(CFLAGS) -DDEBUG_MERGESORT merge.cpp -o merge
