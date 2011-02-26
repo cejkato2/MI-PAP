@@ -2,24 +2,6 @@
 #include <math.h>
 
 
-void merge(int array[], int aux[], int left, int right);
-
-/** Razeni slevanim (od nejvyssiho)
- * @param array pole k serazeni
- * @param aux pomocne pole stejne delky jako array
- * @param left prvni index na ktery se smi sahnout
- * @param right posledni index, na ktery se smi sahnout
- */
-void mergeSort(int array[], int aux[], int left, int right)
-{
-	if (left == right) return;
-	int middleIndex = (left + right) / 2;
-	mergeSort(array, aux, left, middleIndex);
-	mergeSort(array, aux, middleIndex + 1, right);
-	merge(array, aux, left, right);
-
-}
-
 /**
  * Slevani pro Merge sort
  * @param array pole k serazeni
@@ -56,8 +38,23 @@ void merge(int array[], int aux[], int left, int right)
 	}
 }
 
+/** Razeni slevanim (od nejvyssiho)
+ * @param array pole k serazeni
+ * @param aux pomocne pole stejne delky jako array
+ * @param left prvni index na ktery se smi sahnout
+ * @param right posledni index, na ktery se smi sahnout
+ */
+void mergeSort(int array[], int aux[], int left, int right)
+{
+	if (left == right) return;
+	int middleIndex = (left + right) / 2;
+	mergeSort(array, aux, left, middleIndex);
+	mergeSort(array, aux, middleIndex + 1, right);
+	merge(array, aux, left, right);
 
+}
 
+#ifdef DEBUG_MERGESORT
 int main(int argc, char** argv)
 {
 
@@ -73,3 +70,5 @@ int main(int argc, char** argv)
 
 	return 0;
 }
+#endif
+

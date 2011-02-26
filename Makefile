@@ -1,11 +1,19 @@
-	CC=g++
-CFLAGS=-Wall -pedantic
+CC=g++
+CFLAGS=-g -Wall -pedantic
 
-merge:	merge.cpp
-	$(CC) $(CFLAGS) merge.cpp -o merge
+all: merge.o eomerge
+
+merge.o:	merge.cpp
+	$(CC) -c merge.cpp 
+
+eomerge:	merge.o eomerge.cpp
+	$(CC) $(CFLAGS) eomerge.cpp merge.o -o eomerge
+
+debug_ms: merge.cpp
+	$(CC) $(CFLAGS) -DDEBUG_MERGESORT merge.cpp -o merge
 
 clean: 
-	rm -f merge *.o
+	rm -f merge eomerge *.o
 
 uncrustify:
 	uncrustify -c /usr/share/uncrustify/linux-indent.cfg --no-backup --replace *.cpp
