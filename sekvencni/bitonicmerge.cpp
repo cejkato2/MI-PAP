@@ -58,8 +58,8 @@ void BitonicMergeSort(int a[], int low, int count, int direction)
 	//pokud je pocet prvku vetsi jak 1
 	if (count > 1) {
 		int m = count / 2;  
-		BitonicMergeSort(a, low, m, neg(direction)); //serazene pole vzestupne
-		BitonicMergeSort(a, low+m, count - m, direction); //serazene pole sestupne
+		BitonicMergeSort(a, low, m, neg(direction));
+		BitonicMergeSort(a, low+m, count - m, direction);
 		BitonicMerge(a,low,count,direction); //merge in direction
 	}
 }
