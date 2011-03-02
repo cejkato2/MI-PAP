@@ -3,7 +3,7 @@ include ../Makefile.inc
 OBJS=../obj
 
 shearsort: $(OBJS)/array2D.o $(OBJS)/eot.o shearsort.cpp
-	$(CC) $(CFLAGS) shearsort.cpp $(OBJS)/*.o -o shearsort
+	$(CC) $(CFLAGS) $(OMPFLAG) shearsort.cpp $(OBJS)/*.o -o shearsort
 
 $(OBJS)/eot.o:	eot.h eot.cpp
 	$(CC) -c eot.cpp -o $(OBJS)/eot.o
