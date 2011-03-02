@@ -16,8 +16,8 @@ $(OBJS)/2darray.o:	utils/2Darray.cpp
 $(OBJS)/loader.o:	utils/loader.cpp
 	$(CC) -c utils/loader.cpp -o $(OBJS)/loader.o
 
-eomerge:	$(OBJS)/merge.o $(OBJS)/array.o $(OBJS)/loader.o eomerge.cpp
-	$(CC) $(CFLAGS) $(OMPFLAG) eomerge.cpp $(OBJS)/merge.o $(OBJS)/array.o $(OBJS)/loader.o -o eomerge
+eomerge:	$(OBJS)/merge.o $(OBJS)/array.o $(OBJS)/loader.o $(OBJS)/2darray.o eomerge.cpp
+	$(CC) $(CFLAGS) $(OMPFLAG) eomerge.cpp $(OBJS)/merge.o $(OBJS)/array.o $(OBJS)/loader.o $(OBJS)/2darray.o -o eomerge
 
 debug_ms: merge.cpp
 	$(CC) $(CFLAGS) -DDEBUG_MERGESORT merge.cpp -o merge
@@ -28,10 +28,10 @@ clean:
 	cd paralelni; make clean
 
 sekvencni: force_make 	
-	cd sekvencni/; make
+	cd sekvencni/ && $(MAKE)
 
 paralelni: force_make
-	cd paralelni/; make
+	cd paralelni/ && $(MAKE)
 
 force_make:
 	true

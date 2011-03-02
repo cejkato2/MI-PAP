@@ -4,13 +4,14 @@
 #include "../array.h"
 #include "2Darray.h"
 #include "loader.h"
+#include "math.h"
 
 void getFilename(char **filename, int argc, char **argv)
 {
 	static struct option long_options[] = {
 		/* These options set a flag. */
-		{ "file", required_argument, 0,			'f'																																																																																																																																																																																																																																																																								       },
-		{ 0,	  0,		     0,			0																																																																																																																																																																																																																																																																								       }
+		{ "file", required_argument, 0,	 'f' },
+		{ 0,	  0,		     0,	 0   }
 	};
 	/* getopt_long stores the option index here. */
 	int option_index = 0;
@@ -69,29 +70,52 @@ void loadValues(char *filename, Array &array)
 	}
 }
 
-void loadValues(char *filename, Array2D *a)
+void loadValues(char *filename, Array2D *a2d)
 {
-//	std::ifstream in;
-//
-//	if (filename == NULL) {
-//		std::cerr << "No input file specified\n" << std::endl;
-//		return;
-//	}
-//
-//	in.open(filename);
-//	if (in.good() != true) {
-//		std::cerr << "File not found" << std::endl;
-//		return;
-//	}
-//
-//	while (in.eof() != true) {
-//		int val;
-//
-//		in >> val;
-//		if (in.eof() != true) {
-//			array.addValue(val);
-//		}
-//	}
+	std::ifstream in;
+	Array a;
+
+	if (filename == NULL) {
+		std::cerr << "No input file specified\n" << std::endl;
+		return;
+	}
+
+	in.open(filename);
+	if (in.good() != true) {
+		std::cerr << "File not found" << std::endl;
+		return;
+	}
+
+	while (in.eof() != true) {
+		int val;
+
+		in >> val;
+		if (in.eof() != true) {
+			a.addValue(val);
+		}
+
+		int x, y;
+		int size = a.getSize();
+		int n = (int)sqrt((double)size);
+		if (n * n != size) {
+			//neni ctvercova :-(
+			x = n;
+			while ((size % x) != 0) {
+				x--;
+			}
+			y = size / x;
+		} else {
+			x = y = n;
+		}
+
+		int index = 0;
+		int *data = a.getData();
+		for (int i = 0; i < x; i++) {
+			for (int j = 0; j < y; j++) {
+				a2d->setValueAt(data[index++], i, j);
+			}
+		}
+	}
 }
 
 

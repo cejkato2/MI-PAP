@@ -1,4 +1,4 @@
 CC=g++
-CFLAGS=-g -Wall -pedantic
+CFLAGS=-g -Wall -pedantic -lm
 OMPFLAG=-fopenmp
 
