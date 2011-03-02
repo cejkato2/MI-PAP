@@ -28,10 +28,10 @@ clean:
 	cd paralelni; make clean
 
 sekvencni: force_make 	
-	cd sekvencni/; make
+	cd sekvencni/ && $(MAKE)
 
 paralelni: force_make
-	cd paralelni/; make
+	cd paralelni/ && $(MAKE)
 
 force_make:
 	true
