@@ -10,8 +10,8 @@ void getFilename(char **filename, int argc, char **argv)
 {
 	static struct option long_options[] = {
 		/* These options set a flag. */
-		{ "file", required_argument, 0,	 'f' },
-		{ 0,	  0,		     0,	 0   }
+		{ "file", required_argument, 0,			'f'		     },
+		{ 0,	  0,		     0,			0		     }
 	};
 	/* getopt_long stores the option index here. */
 	int option_index = 0;
@@ -75,45 +75,32 @@ void loadValues(char *filename, Array2D *a2d)
 	std::ifstream in;
 	Array a;
 
-	if (filename == NULL) {
-		std::cerr << "No input file specified\n" << std::endl;
+	loadValues(filename, a);
+
+	if (a.isEmpty() == true) {
 		return;
 	}
 
-	in.open(filename);
-	if (in.good() != true) {
-		std::cerr << "File not found" << std::endl;
-		return;
+	int x, y;
+	int size = a.getSize();
+	int n = (int)sqrt((double)size);
+	if (n * n != size) {
+		//neni ctvercova :-(
+		x = n;
+		while ((size % x) != 0) {
+			x--;
+		}
+		y = size / x;
+	} else {
+		x = y = n;
 	}
-
-	while (in.eof() != true) {
-		int val;
-
-		in >> val;
-		if (in.eof() != true) {
-			a.addValue(val);
-		}
-
-		int x, y;
-		int size = a.getSize();
-		int n = (int)sqrt((double)size);
-		if (n * n != size) {
-			//neni ctvercova :-(
-			x = n;
-			while ((size % x) != 0) {
-				x--;
-			}
-			y = size / x;
-		} else {
-			x = y = n;
-		}
-
-		int index = 0;
-		int *data = a.getData();
-		for (int i = 0; i < x; i++) {
-			for (int j = 0; j < y; j++) {
-				a2d->setValueAt(data[index++], i, j);
-			}
+	int index = 0;
+	int *data = a.getData();
+	a2d->addRow(y);
+	a2d->addColumn(x);
+	for (int i = 0; i < x; i++) {
+		for (int j = 0; j < y; j++) {
+			a2d->setValueAt(data[index++], i, j);
 		}
 	}
 }

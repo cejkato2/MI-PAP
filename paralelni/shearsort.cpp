@@ -1,8 +1,10 @@
 #include <iostream>
 #include <cmath>
-#include "../utils/2Darray.h"
-#include "eot.h"
 #include <cstdlib>
+#include "../utils/2Darray.h"
+#include "../array.h"
+#include "../utils/loader.h"
+#include "eot.h"
 
 int getRowDirection(int row)
 {
@@ -40,15 +42,23 @@ void generateTable(Array2D& a, int x, int y);
 
 int main(int argc, char** argv)
 {
+	char *filename;
+	Array2D a(0, 0);
 
-	Array2D a(10, 10);
+	getFilename(&filename, argc, argv);
+	loadValues(filename, &a);
+
+	if (a.getSize() == 0) {
+		std::cerr << "No input values" << std::endl;
+		return 1;
+	}
+
 
 	std::cout << "Vstupní pole:\n" << std::endl;
-	generateTable(a, 10, 10);
 	a.print();
 	std::cout << "\n";
 
-	shearSort(a, 10, 10);
+	shearSort(a, a.getSizeX(), a.getSizeY());
 
 	std::cout << "Setříděné pole:\n" << std::endl;
 	a.print();

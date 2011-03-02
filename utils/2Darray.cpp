@@ -8,8 +8,8 @@ void Array2D::initArray(int sizeX, int sizeY)
 
 Array2D::Array2D()
 {
-	initArray(10, 10);
-	sizeX = sizeY = 10;
+	initArray(0, 0);
+	sizeX = sizeY = 0;
 }
 
 Array2D::Array2D(int sizeX, int sizeY)
@@ -70,3 +70,19 @@ void Array2D::addColumn(int numColumns)
 	}
 	this->sizeX = newCount;
 }
+
+int Array2D::getSize()
+{
+	return this->sizeX * this->sizeY;
+}
+
+int Array2D::getSizeX()
+{
+	return this->sizeX;
+}
+
+int Array2D::getSizeY()
+{
+	return this->sizeY;
+}
+

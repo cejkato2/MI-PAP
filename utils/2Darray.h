@@ -14,6 +14,12 @@ void setValueAt(int val,int i,int j);
 void print();
 void addRow(int numRows=1); //pridani radku
 void addColumn(int numColumns=1);
+//vrati x*y
+int getSize();
+
+int getSizeX();
+
+int getSizeY();
 //Array2D* getArray2D();
 
 private:
