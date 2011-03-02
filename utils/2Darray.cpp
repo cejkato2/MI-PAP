@@ -1,5 +1,5 @@
-#include "2Darray.h"
 #include <iostream>
+#include "2Darray.h"
 
 void Array2D::initArray(int sizeX, int sizeY)
 {

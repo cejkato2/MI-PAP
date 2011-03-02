@@ -1,6 +1,6 @@
-CC=g++
-CFLAGS=-g -Wall -pedantic
-OMPFLAG=-fopenmp
+include ../Makefile.inc
+
+OBJS=../obj
 
 default: bitonic_ms
 
@@ -12,7 +12,5 @@ eomerge: eodmerge.cpp
 	$(CC) $(CFLAGS) eodmerge.cpp -o eodmerge
 
 clean: 
-	rm -f bmerge eodmerge *.o
+	rm -f bmerge eodmerge *.o a.out
 
-uncrustify:
-	uncrustify -c /usr/share/uncrustify/linux-indent.cfg --no-backup --replace *.cpp

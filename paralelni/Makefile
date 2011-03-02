@@ -1,21 +1,19 @@
-CC=g++
-CFLAGS=-g -fopenmp -Wall -pedantic
+include ../Makefile.inc
 
-shearsort: array2D.o eot.o shearsort.cpp
-	$(CC) $(CFLAGS) shearsort.cpp *.o -o shearsort
+OBJS=../obj
 
-eot.o:	eot.h eot.cpp
-	$(CC) -c eot.cpp
+shearsort: $(OBJS)/array2D.o $(OBJS)/eot.o shearsort.cpp
+	$(CC) $(CFLAGS) shearsort.cpp $(OBJS)/*.o -o shearsort
 
-array2D.o: ../utils/2Darray.cpp
-	$(CC) -c ../utils/2Darray.cpp 
+$(OBJS)/eot.o:	eot.h eot.cpp
+	$(CC) -c eot.cpp -o $(OBJS)/eot.o
 
-eot_dbg: array2D.o eot.cpp
-	$(CC) $(CFLAGS) -DDEBUG_EOT eot.cpp *.o -o eot
+$(OBJS)/array2D.o: ../utils/2Darray.cpp
+	$(CC) -c ../utils/2Darray.cpp -o $(OBJS)/array2D.o
+
+eot_dbg: $(OBJS)/array2D.o eot.cpp
+	$(CC) $(CFLAGS) -DDEBUG_EOT eot.cpp $(OBJS)/*.o -o eot
 
 clean:	
-	rm -rf eot *.o eot shearsort
-
-uncrustify:
-	uncrustify -c /usr/share/uncrustify/linux-indent.cfg --no-backup --replace *.cpp
+	rm -rf eot $(OBJS)/*.o eot shearsort a.out
 

@@ -2,14 +2,15 @@
 #include <fstream>
 #include <getopt.h>
 #include "../array.h"
+#include "2Darray.h"
 #include "loader.h"
 
 void getFilename(char **filename, int argc, char **argv)
 {
 	static struct option long_options[] = {
 		/* These options set a flag. */
-		{ "file", required_argument, 0,			'f'										       },
-		{ 0,	  0,		     0,			0										       }
+		{ "file", required_argument, 0,			'f'																																																																																																																																																																																																																																																																								       },
+		{ 0,	  0,		     0,			0																																																																																																																																																																																																																																																																								       }
 	};
 	/* getopt_long stores the option index here. */
 	int option_index = 0;
@@ -66,7 +67,31 @@ void loadValues(char *filename, Array &array)
 			array.addValue(val);
 		}
 	}
+}
 
+void loadValues(char *filename, Array2D *a)
+{
+//	std::ifstream in;
+//
+//	if (filename == NULL) {
+//		std::cerr << "No input file specified\n" << std::endl;
+//		return;
+//	}
+//
+//	in.open(filename);
+//	if (in.good() != true) {
+//		std::cerr << "File not found" << std::endl;
+//		return;
+//	}
+//
+//	while (in.eof() != true) {
+//		int val;
+//
+//		in >> val;
+//		if (in.eof() != true) {
+//			array.addValue(val);
+//		}
+//	}
 }
 
 

@@ -1,6 +1,5 @@
-#include <vector>
-
 #ifndef ARRAY_2D_H
+#include <vector>
  
 class Array2D{
 public:

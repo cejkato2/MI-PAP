@@ -5,7 +5,7 @@
 int main(int argc, char** argv)
 {
 
-	int a[8] = { 10, 22, 1, 13 , 2 , 5 ,0, 12};
+	int a[8] = { 10, 22, 1, 13, 2, 5, 0, 12 };
 
 
 	for (int i = 0; i < 7; i++) {
