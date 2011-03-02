@@ -12,7 +12,7 @@ eomerge: eodmerge.cpp
 	$(CC) $(CFLAGS) eodmerge.cpp -o eodmerge
 
 clean: 
-	rm -f bmerge oedmerge *.o
+	rm -f bmerge eodmerge *.o
 
 uncrustify:
 	uncrustify -c /usr/share/uncrustify/linux-indent.cfg --no-backup --replace *.cpp

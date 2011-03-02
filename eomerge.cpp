@@ -10,11 +10,10 @@
 int main(int argc, char **argv)
 {
 	char *filename = NULL;
-	static struct option long_options[] =
-	{
+	static struct option long_options[] = {
 		/* These options set a flag. */
-		{ "file", required_argument, 0,			'f'		       },
-		{ 0,	  0,		     0,			0		       }
+		{ "file", required_argument, 0,			'f'                                                    },
+		{ 0,      0,                 0,			0                                                      }
 	};
 	/* getopt_long stores the option index here. */
 	int option_index = 0;
