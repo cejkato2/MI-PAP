@@ -10,5 +10,6 @@ public:
   int *getData();
   void addValue(int v);
   void print();
+  bool isEmpty();
 };
 #endif

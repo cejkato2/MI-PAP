@@ -48,4 +48,9 @@ void Array::print()
 	std::cout << std::endl;
 }
 
+bool Array::isEmpty()
+{
+	return (size == 0);
+}
+
 
