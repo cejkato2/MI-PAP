@@ -10,8 +10,12 @@ void getFilename(char **filename, int argc, char **argv)
 {
 	static struct option long_options[] = {
 		/* These options set a flag. */
-		{ "file", required_argument, 0,			'f'						     },
-		{ 0,	  0,		     0,			0						     }
+		{
+			"file", required_argument, 0, 'f'
+		},
+		{
+			0, 0, 0, 0
+		}
 	};
 	/* getopt_long stores the option index here. */
 	int option_index = 0;
@@ -96,7 +100,7 @@ void loadValues(char *filename, Array2D *a2d)
 	}
 	int index = 0;
 	int *data = a.getData();
-        std::cout << "Size of matrix: " << x << "x" << y << std::endl;
+	std::cout << "Size of matrix: " << x << "x" << y << std::endl;
 	a2d->addRow(y);
 	a2d->addColumn(x);
 	for (int i = 0; i < y; i++) {
