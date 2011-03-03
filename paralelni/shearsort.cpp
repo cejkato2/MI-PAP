@@ -23,25 +23,25 @@ void shearSort(Array2D& a, int rows, int cols)
 	std::cout << "Počet fází:" << numOfPhases << std::endl;
 //0 - je prvni liche cislo
 //1 - je prvni sude cislo
-	int row,col;
+	int row, col;
 	for (int phase = 0; phase < numOfPhases; phase++) {
-	
+
 		if ((phase % 2) == 0) {
 			//licha faze
-	
+
 		#pragma omp parallel for shared(phase,rows,cols) private(row) schedule(dynamic,CHUNKSIZE)
-		for (row = 0; row < rows; row++) {
+			for (row = 0; row < rows; row++) {
 				EOTRow(a, cols, row, getRowDirection(row)); //kazdy radek v jimem smeru
 			}
 		}else{
 			//suda fazei
 		#pragma omp parallel for shared(phase,rows,cols) private(col) schedule(dynamic,CHUNKSIZE)
-		for (col = 0; col < cols; col++) {
+			for (col = 0; col < cols; col++) {
 				EOTColumn(a, rows, col, ASCENDING); //serad vsechny sloupce smerem dolu
 			}
-		   }
-		}	   
+		}
 	}
+}
 
 
 
