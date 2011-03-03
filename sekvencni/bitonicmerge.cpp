@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 	std::cout << "Input:" << std::endl;
 	a.print();
 
-	BitonicMergeSort(a.getData(), 0, a.getSize() - 1, ASCENDING);
+	BitonicMergeSort(a.getData(), 0, a.getSize(), ASCENDING);
 
 	std::cout << "Output:" << std::endl;
 	a.print();
