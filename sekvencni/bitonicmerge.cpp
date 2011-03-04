@@ -1,8 +1,24 @@
 #include <stdio.h>
 #include <math.h>
+#include <stack>
 
 #define ASCENDING 0
 #define DESCENDING 1
+
+#define BITONIC_SORT 0
+#define BITONIC_MERGE 1
+
+//struktura, ktera pujde na stack
+struct BitonicIndexRecord {
+	int low;
+	int count;
+	int direction;
+	int typeOfOperation;	
+};
+
+std::stack<BitonicIndexRecord* > stack;
+
+//funkce bitonickeho sortu
 
 int greatestPowerOfTwoLessThan(int n)
 {
@@ -57,17 +73,38 @@ int neg(int direction)
 }
 
 //low = spodni index
-void BitonicMergeSort(int a[], int low, int count, int direction)
-{
+//void BitonicMergeSort(int a[], int low, int count, int direction)
+//{
 	//pokud je pocet prvku vetsi jak 1
-	if (count > 1) {
-		int m = count / 2;
-		BitonicMergeSort(a, low, m, neg(direction));
-		BitonicMergeSort(a, low + m, count - m, direction);
-		BitonicMerge(a, low, count, direction); //merge in direction
-	}
+//	if (count > 1) {
+//		int m = count / 2;
+//		BitonicMergeSort(a, low, m, neg(direction));
+//		BitonicMergeSort(a, low + m, count - m, direction);
+//		BitonicMerge(a, low, count, direction); //merge in direction
+//	}
+//}
+
+void BitonicSortOperation(BitonicIndexRecord* brecord)
+{
+
 }
 
+
+void BitonicMergeSort(int a[], int low, int count, int direction)
+{
+//priprava na vlozeni na stack prvniho zaznamu
+BitonicIndexRecord* brecord = new BitonicIndexRecord();
+brecord->low=low;
+brecord->count=count;
+brecord->direction=direction;
+brecord->typeOfOperation=BITONIC_SORT; //operace je bitonicky sort
+
+//dokud neni stack prazdny, tak
+while(stack.size != 0){
+
+}
+
+}
 
 int main(int argc, char** argv)
 {
