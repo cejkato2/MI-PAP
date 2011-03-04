@@ -2,7 +2,7 @@ include ../Makefile.inc
 
 OBJS=../obj
 
-shearsort: $(OBJS)/2darray.o $(OBJS)/eot.o shearsort.cpp
+shearsort: $(OBJS)/2darray.o $(OBJS)/loader.o $(OBJS)/eot.o shearsort.cpp
 	$(CC) $(CFLAGS) $(OMPFLAG) shearsort.cpp $(OBJS)/*.o -o shearsort
 
 $(OBJS)/eot.o:	eot.h eot.cpp

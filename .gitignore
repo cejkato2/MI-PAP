@@ -6,4 +6,5 @@ merge
 eomerge
 paralelni/shearsort
 sekvencni/bmerge
+sekvencni/eodmerge
 *.gch

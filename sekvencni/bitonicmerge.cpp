@@ -1,6 +1,9 @@
-#include <stdio.h>
 #include <math.h>
 #include <stack>
+#include <iostream>
+#include "../array.h"
+#include "../utils/2Darray.h"
+#include "../utils/loader.h"
 
 #define ASCENDING 0
 #define DESCENDING 1
@@ -108,21 +111,26 @@ while(stack.size != 0){
 
 int main(int argc, char** argv)
 {
+	char *filename = NULL;
+	Array a;
 
-	int a[8] = { 10, 22, 1, 13, 2, 5, 0, 12 };
 
+	getFilename(&filename, argc, argv);
+	loadValues(filename, a);
 
-	for (int i = 0; i < 7; i++) {
-		printf("%i ", a[i]);
+	if (a.isEmpty() == true) {
+		std::cerr << "No input values" << std::endl;
+		return 1;
 	}
-	printf("\n");
 
-	BitonicMergeSort(a, 0, 7, ASCENDING);
 
-	for (int i = 0; i < 7; i++) {
-		printf("%i ", a[i]);
-	}
-	printf("\n");
+	std::cout << "Input:" << std::endl;
+	a.print();
+
+	BitonicMergeSort(a.getData(), 0, a.getSize(), ASCENDING);
+
+	std::cout << "Output:" << std::endl;
+	a.print();
 
 	return 0;
 }
