@@ -12,13 +12,13 @@ void exchange(int *a, int i, int j);
 
 void oddEvenMergeSort(int *a, int size, int lo, int n)
 {
-  if (n>1)
-  {
-    int m=n/2;
-    oddEvenMergeSort(a, size, lo, m);
-    oddEvenMergeSort(a, size, lo+m, m);
-    oddEvenMerge(a, size, lo, n, 1);
-  }
+//std::cout << "oddEvenMergeSort(" << lo << ", " << n << ")" << std::endl;
+	if (n > 1) {
+		int m = n / 2;
+		oddEvenMergeSort(a, size, lo, m);
+		oddEvenMergeSort(a, size, lo + m, m);
+		oddEvenMerge(a, size, lo, n, 1);
+	}
 }
 
 /** lo is the starting position and
@@ -27,34 +27,37 @@ void oddEvenMergeSort(int *a, int size, int lo, int n)
  */
 void oddEvenMerge(int *a, int size, int lo, int n, int r)
 {
-  int m=r*2;
-  if (m<n)
-  {
-    oddEvenMerge(a, size, lo, n, m);      // even subsequence
-    oddEvenMerge(a, size, lo+r, n, m);    // odd subsequence
-    for (int i=lo+r; i+r<lo+n; i+=m) {
-      if ((i+r) < size) {
-        compare(a, i, i+r);
-      }
-    }
-  } else {
-    if ((lo+r) < size) {
-      compare(a, lo, lo+r);
-    }
-  }
+//std::cout << "oddEvenMerge(" <<  lo << ", " <<  n << ", " <<  r << ")" << std::endl;
+	int m = r * 2;
+
+	if (m < n) {
+		oddEvenMerge(a, size, lo, n, m);        // even subsequence
+		oddEvenMerge(a, size, lo + r, n, m);    // odd subsequence
+		for (int i = lo + r; i + r < lo + n; i += m) {
+			//if ((i + r) < size) {
+				compare(a, i, i + r);
+			//}
+		}
+	} else {
+		//if ((lo + r) < size) {
+			compare(a, lo, lo + r);
+		//}
+	}
 }
 
 void compare(int *a, int i, int j)
 {
-  if (a[i]>a[j])
-    exchange(a, i, j);
+	if (a[i] > a[j])
+		exchange(a, i, j);
 }
 
 void exchange(int *a, int i, int j)
 {
-  int t=a[i];
-  a[i]=a[j];
-  a[j]=t;
+  //std::cout << "exchange(" << i << ", " << j << ")" << std::endl;
+	int t = a[i];
+
+	a[i] = a[j];
+	a[j] = t;
 }
 
 int main(int argc, char** argv)
@@ -74,7 +77,7 @@ int main(int argc, char** argv)
 	a.print();
 	std::cout << "\n";
 
-        oddEvenMergeSort(a.getData(), a.getSize(), 0, a.getSize()-1);
+	oddEvenMergeSort(a.getData(), a.getSize(), 0, a.getSize());
 
 	std::cout << "Setříděné pole:\n" << std::endl;
 	a.print();
