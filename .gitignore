@@ -5,6 +5,7 @@ a.out
 merge
 eomerge
 paralelni/shearsort
+paralelni/eomergesort
 sekvencni/bmerge
 sekvencni/eodmerge
 *.gch

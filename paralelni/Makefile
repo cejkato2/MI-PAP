@@ -2,6 +2,11 @@ include ../Makefile.inc
 
 OBJS=../obj
 
+all: eomergesort shearsort
+
+eomergesort: $(OBJS)/array.o $(OBJS)/loader.o eomergesort.cpp
+	$(CC) $(CFLAGS) $(OMPFLAG) eomergesort.cpp $(OBJS)/*.o -o eomergesort
+
 shearsort: $(OBJS)/2darray.o $(OBJS)/loader.o $(OBJS)/eot.o shearsort.cpp
 	$(CC) $(CFLAGS) $(OMPFLAG) shearsort.cpp $(OBJS)/*.o -o shearsort
 
@@ -15,5 +20,5 @@ eot_dbg: $(OBJS)/2darray.o eot.cpp
 	$(CC) $(CFLAGS) -DDEBUG_EOT eot.cpp $(OBJS)/*.o -o eot
 
 clean:	
-	rm -rf eot $(OBJS)/*.o eot shearsort a.out
+	rm -rf eot $(OBJS)/*.o eot shearsort eomergesort a.out
 
