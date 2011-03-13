@@ -4,6 +4,8 @@
 a.out
 merge
 eomerge
+testloader
+pack.tar.gz
 paralelni/shearsort
 paralelni/eomergesort
 sekvencni/bmerge

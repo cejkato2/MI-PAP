@@ -23,7 +23,7 @@ debug_ms: merge.cpp
 	$(CC) $(CFLAGS) -DDEBUG_MERGESORT merge.cpp -o merge
 
 clean: 
-	rm -f merge eomerge $(OBJS)/*.o a.out
+	rm -f merge eomerge testloader $(OBJS)/*.o a.out
 	cd sekvencni; make clean
 	cd paralelni; make clean
 
@@ -37,3 +37,9 @@ force_make:
 	true
 uncrustify:
 	uncrustify -c /usr/share/uncrustify/linux-indent.cfg --no-backup --replace *.cpp utils/*.cpp paralelni/*.cpp sekvencni/*.cpp
+
+to_star:
+	utils/transporter.sh
+
+testloader: testloader.cpp
+	$(CC) $(CFLAGS) $(OMPFLAG) array.cpp utils/loader.cpp utils/2Darray.cpp testloader.cpp -o testloader

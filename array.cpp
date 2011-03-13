@@ -11,7 +11,7 @@ Array::Array()
 
 Array::~Array()
 {
-	capacity = 10;
+	capacity = 0;
 	size = 0;
 	delete [] data;
 }
@@ -28,12 +28,16 @@ int *Array::getData()
 
 void Array::addValue(int v)
 {
-	if (size == capacity + 1) {
-		int *temp = new int[capacity * 2];
+	if ((size == (capacity + 1)) || (size == capacity)) {
+                if (capacity == 0) {
+                  capacity = 10;
+                } else {
+                  capacity *= 2;
+                }
+		int *temp = new int[capacity];
 		for (int i = 0; i < size; ++i) {
 			temp[i] = data[i];
 		}
-		capacity *= 2;
 		delete [] data;
 		data = temp;
 	}

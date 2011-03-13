@@ -72,6 +72,7 @@ void loadValues(char *filename, Array &array)
 			array.addValue(val);
 		}
 	}
+        in.close();
 }
 
 void loadValues(char *filename, Array2D *a2d)
