@@ -35,12 +35,12 @@ void oddEvenMerge(int *a, int size, int lo, int n, int r)
 		oddEvenMerge(a, size, lo + r, n, m);    // odd subsequence
 		for (int i = lo + r; i + r < lo + n; i += m) {
 			//if ((i + r) < size) {
-				compare(a, i, i + r);
+			compare(a, i, i + r);
 			//}
 		}
 	} else {
 		//if ((lo + r) < size) {
-			compare(a, lo, lo + r);
+		compare(a, lo, lo + r);
 		//}
 	}
 }
@@ -53,7 +53,7 @@ void compare(int *a, int i, int j)
 
 void exchange(int *a, int i, int j)
 {
-  //std::cout << "exchange(" << i << ", " << j << ")" << std::endl;
+	//std::cout << "exchange(" << i << ", " << j << ")" << std::endl;
 	int t = a[i];
 
 	a[i] = a[j];
@@ -75,18 +75,18 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-        #ifdef DEBUG_OUTPUT
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Vstupní pole:\n" << std::endl;
 	a.print();
 	std::cout << "\n";
-        #endif
+	#endif
 
 	oddEvenMergeSort(a.getData(), a.getSize(), 0, a.getSize());
 
-        #ifdef DEBUG_OUTPUT
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Setříděné pole:\n" << std::endl;
 	a.print();
-        #endif
+	#endif
 
 	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 

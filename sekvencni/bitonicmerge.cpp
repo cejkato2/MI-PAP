@@ -180,6 +180,7 @@ int main(int argc, char** argv)
 	double timer;
 	char *filename = NULL;
 	Array a;
+
 	timer = omp_get_wtime();
 
 
@@ -191,17 +192,17 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-        #ifdef DEBUG_OUTPUT
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Input:" << std::endl;
 	a.print();
-        #endif
+	#endif
 
 	BitonicMergeSort(a.getData(), 0, a.getSize(), ASCENDING);
 
-        #ifdef DEBUG_OUTPUT
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Output:" << std::endl;
 	a.print();
-        #endif
+	#endif
 
 	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 

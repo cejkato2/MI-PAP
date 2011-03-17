@@ -1,13 +1,15 @@
 #include <iostream>
 #include <fstream>
 #include <getopt.h>
+#include <math.h>
+#include <stdlib.h>
 #include "../array.h"
 #include "2Darray.h"
 #include "loader.h"
-#include "math.h"
 
 void getFilename(char **filename, int argc, char **argv)
 {
+	bool got_file = false;
 	static struct option long_options[] = {
 		/* These options set a flag. */
 		{
@@ -42,10 +44,14 @@ void getFilename(char **filename, int argc, char **argv)
 
 		case 'f':
 			*filename = optarg;
+			got_file = true;
 			break;
 		default:
 			return;
 		}
+	}
+	if (got_file == false) {
+		filename = NULL;
 	}
 }
 
@@ -54,25 +60,26 @@ void loadValues(char *filename, Array &array)
 	std::ifstream in;
 
 	if (filename == NULL) {
-		std::cerr << "No input file specified\n" << std::endl;
-		return;
-	}
-
-	in.open(filename);
-	if (in.good() != true) {
-		std::cerr << "File not found" << std::endl;
-		return;
-	}
-
-	while (in.eof() != true) {
-		int val;
-
-		in >> val;
-		if (in.eof() != true) {
-			array.addValue(val);
+		for (int i = 0; i < ARRAY_SIZE; ++i) {
+			array.addValue((int)random());
 		}
+	} else {
+		in.open(filename);
+		if (in.good() != true) {
+			std::cerr << "File not found" << std::endl;
+			return;
+		}
+
+		while (in.eof() != true) {
+			int val;
+
+			in >> val;
+			if (in.eof() != true) {
+				array.addValue(val);
+			}
+		}
+		in.close();
 	}
-        in.close();
 }
 
 void loadValues(char *filename, Array2D *a2d)
@@ -101,7 +108,11 @@ void loadValues(char *filename, Array2D *a2d)
 	}
 	int index = 0;
 	int *data = a.getData();
+
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Size of matrix: " << x << "x" << y << std::endl;
+	#endif
+
 	a2d->addRow(y);
 	a2d->addColumn(x);
 	for (int i = 0; i < y; i++) {
