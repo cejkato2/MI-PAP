@@ -50,7 +50,10 @@ void generateTable(Array2D& a, int x, int y);
 int main(int argc, char** argv)
 {
 	char *filename;
+	double timer;
 	Array2D a(0, 0);
+
+	timer = omp_get_wtime();
 
 	getFilename(&filename, argc, argv);
 	loadValues(filename, &a);
@@ -66,9 +69,10 @@ int main(int argc, char** argv)
 	std::cout << "\n";
 
 	shearSort(a, a.getSizeX(), a.getSizeY());
+	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 
-	std::cout << "Setříděné pole:\n" << std::endl;
-	a.print();
+	//std::cout << "Setříděné pole:\n" << std::endl;
+	//a.print();
 
 	return 0;
 }
