@@ -64,15 +64,20 @@ int main(int argc, char** argv)
 	}
 
 
+        #ifdef DEBUG_OUTPUT
 	std::cout << "Vstupní pole:\n" << std::endl;
 	a.print();
 	std::cout << "\n";
+        #endif
 
 	shearSort(a, a.getSizeX(), a.getSizeY());
-	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 
-	//std::cout << "Setříděné pole:\n" << std::endl;
-	//a.print();
+        #ifdef DEBUG_OUTPUT
+	std::cout << "Setříděné pole:\n" << std::endl;
+	a.print();
+        #endif
+
+	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 
 	return 0;
 }

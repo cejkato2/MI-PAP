@@ -31,9 +31,11 @@ int main(int argc, char **argv)
 
 	mergeSort(a.getData(), aux, 0, a.getSize() - 1);
 
+        #ifdef DEBUG_OUTPUT
+	a.print();
+        #endif
 
 	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
-	a.print();
 
 	delete [] aux;
 
