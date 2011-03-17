@@ -2,7 +2,7 @@ include ../Makefile.inc
 
 OBJS=../obj
 
-all: eomergesort shearsort
+all: eomergesort shearsort bitonicsort
 
 eomergesort: $(OBJS)/array.o $(OBJS)/loader.o eomergesort.cpp
 	$(CC) $(CFLAGS) $(OMPFLAG) eomergesort.cpp $(OBJS)/*.o -o eomergesort
@@ -19,6 +19,9 @@ $(OBJS)/2darray.o:	../utils/2Darray.cpp
 eot_dbg: $(OBJS)/2darray.o eot.cpp
 	$(CC) $(CFLAGS) -DDEBUG_EOT eot.cpp $(OBJS)/*.o -o eot
 
+bitonicsort: bitonicmerge.cpp $(OBJS)/array.o $(OBJS)/2darray.o $(OBJS)/loader.o
+	$(CC) $(CFLAGS) $(OMPFLAG) bitonicmerge.cpp $(OBJS)/array.o $(OBJS)/2darray.o $(OBJS)/loader.o -o bitonicsort
+
 clean:	
-	rm -rf eot $(OBJS)/*.o eot shearsort eomergesort a.out
+	rm -rf eot $(OBJS)/*.o eot shearsort eomergesort a.out bitonicsort
 
