@@ -62,10 +62,11 @@ void exchange(int *a, int i, int j)
 
 int main(int argc, char** argv)
 {
+	double timer;
 	char *filename = NULL;
 	Array a;
 
-
+	timer = omp_get_wtime();
 	getFilename(&filename, argc, argv);
 	loadValues(filename, a);
 
@@ -73,14 +74,21 @@ int main(int argc, char** argv)
 		std::cerr << "No input values" << std::endl;
 		return 1;
 	}
+
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Vstupní pole:\n" << std::endl;
 	a.print();
 	std::cout << "\n";
+	#endif
 
 	oddEvenMergeSort(a.getData(), a.getSize(), 0, a.getSize());
 
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Setříděné pole:\n" << std::endl;
 	a.print();
+	#endif
+
+	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 
 	return 0;
 }

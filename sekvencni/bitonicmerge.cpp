@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stack>
 #include <iostream>
+#include <omp.h>
 #include "../array.h"
 #include "../utils/2Darray.h"
 #include "../utils/loader.h"
@@ -176,8 +177,11 @@ void BitonicMergeSort(int a[], int low, int count, int direction)
 
 int main(int argc, char** argv)
 {
+	double timer;
 	char *filename = NULL;
 	Array a;
+
+	timer = omp_get_wtime();
 
 
 	getFilename(&filename, argc, argv);
@@ -188,14 +192,19 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Input:" << std::endl;
-
 	a.print();
+	#endif
+
 	BitonicMergeSort(a.getData(), 0, a.getSize(), ASCENDING);
 
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Output:" << std::endl;
 	a.print();
+	#endif
+
+	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 
 	return 0;
 }

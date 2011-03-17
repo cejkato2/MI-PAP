@@ -29,11 +29,11 @@ int *Array::getData()
 void Array::addValue(int v)
 {
 	if ((size == (capacity + 1)) || (size == capacity)) {
-                if (capacity == 0) {
-                  capacity = 10;
-                } else {
-                  capacity *= 2;
-                }
+		if (capacity == 0) {
+			capacity = 10;
+		} else {
+			capacity *= 2;
+		}
 		int *temp = new int[capacity];
 		for (int i = 0; i < size; ++i) {
 			temp[i] = data[i];

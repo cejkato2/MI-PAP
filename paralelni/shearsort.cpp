@@ -20,9 +20,11 @@ void shearSort(Array2D& a, int rows, int cols)
 {
 	int numOfPhases = 2 * ((int)floor(log2(rows))) + 1;
 
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Počet fází:" << numOfPhases << std::endl;
 //0 - je prvni liche cislo
 //1 - je prvni sude cislo
+	#endif
 	int row, col;
 	for (int phase = 0; phase < numOfPhases; phase++) {
 
@@ -50,7 +52,10 @@ void generateTable(Array2D& a, int x, int y);
 int main(int argc, char** argv)
 {
 	char *filename;
+	double timer;
 	Array2D a(0, 0);
+
+	timer = omp_get_wtime();
 
 	getFilename(&filename, argc, argv);
 	loadValues(filename, &a);
@@ -61,14 +66,20 @@ int main(int argc, char** argv)
 	}
 
 
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Vstupní pole:\n" << std::endl;
 	a.print();
 	std::cout << "\n";
+	#endif
 
 	shearSort(a, a.getSizeX(), a.getSizeY());
 
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Setříděné pole:\n" << std::endl;
 	a.print();
+	#endif
+
+	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 
 	return 0;
 }
