@@ -39,39 +39,37 @@ void BitonicMergeSort(int a[], int low, int size)
 
 		//stride - aktualni zpracovavane velikosti bloku, tedka zpracovavat dokud nedostaneme velikost 1 (pocet bitonickych splitu)
 		//vypocteme aktualni smer zareni
-		int numOfArrows = size / stride; //pocet hlavnich "sipek" s aktualnim stridem
-		int actualArrow; //aktualni zvolena hlavni sipka		
-		int dir;	//aktualni smer zarezni pro hlavni sipku
-	
-		for(actualArrow=0 ; actualArrow < numOfArrows; actualArrow++){
+		int numOfArrows = size / stride;        //pocet hlavnich "sipek" s aktualnim stridem
+		int actualArrow;                        //aktualni zvolena hlavni sipka
+		int dir;                                //aktualni smer zarezni pro hlavni sipku
+
+		for (actualArrow = 0; actualArrow < numOfArrows; actualArrow++) {
 			//tedka mam vybranou hlavni sipku, urcim jeji smer razeni
-			if( (actualArrow%2) == 1){
-				dir = DESCENDING; //licha sipka -> sestupne
+			if ( (actualArrow % 2) == 1) {
+				dir = DESCENDING;       //licha sipka -> sestupne
 			}else{
-				dir = ASCENDING; //suda sipka -> vzestupne
-			} 
-		
+				dir = ASCENDING;        //suda sipka -> vzestupne
+			}
+
 			//tedka musim rozkldat velkou sipku na sipky mensi to delame nez je stride roven 1
-			tmpStride =  stride; //zaciname s velkou sipkou
-			int arrowBase = actualArrow*stride; //zacatek velke sipky
-		
-		while(tmpStride > 1){
-			int numOfSubiters = stride / tmpStride; //pocet subiteraci v aktualnim zmensenem stridu
-			for(int actualSubiter=0; actualSubiter < numOfSubiters; actualSubiter++){
-				int lowIndex = arrowBase + actualSubiter*tmpStride; //zacatek sipky subiterace
-				int median = tmpStride / 2; //median pole kam delat bitonic split
-				//bitonic split
-				for(int shift=0; shift < median; shift++){
-					CompareAndExchange(a,lowIndex+shift,lowIndex+median+shift,dir);
+			tmpStride =  stride;                    //zaciname s velkou sipkou
+			int arrowBase = actualArrow * stride;   //zacatek velke sipky
+
+			//v kazde iteraci se musi upravit velikost stridu
+			for( ;tmpStride > 1 ; tmpStride/=2){
+				int numOfSubiters = stride / tmpStride;                         //pocet subiteraci v aktualnim zmensenem stridu
+				for (int actualSubiter = 0; actualSubiter < numOfSubiters; actualSubiter++) {
+					int lowIndex = arrowBase + actualSubiter * tmpStride;   //zacatek sipky subiterace
+					int median = tmpStride / 2;                             //median pole kam delat bitonic split
+					//bitonic split
+					for (int shift = 0; shift < median; shift++) {
+						CompareAndExchange(a, lowIndex + shift, lowIndex + median + shift, dir);
+					}
 				}
-			} 	
-			//upravim velikost stridu -> na pulku (poustim to na mensi casti)
-			tmpStride = tmpStride / 2;
-			
-		 }
-		
+			}
+
+		}
 	}
- }
 
 }
 
@@ -93,7 +91,7 @@ int main(int argc, char** argv)
 	std::cout << "Input:" << std::endl;
 
 	a.print();
-		
+
 	BitonicMergeSort(a.getData(), 0, a.getSize());
 
 	std::cout << "Output:" << std::endl;
