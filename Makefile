@@ -16,7 +16,10 @@ $(OBJS)/2darray.o:	utils/2Darray.cpp
 $(OBJS)/loader.o:	utils/loader.cpp
 	$(CC) -c utils/loader.cpp -o $(OBJS)/loader.o
 
-eomerge:	$(OBJS)/merge.o $(OBJS)/array.o $(OBJS)/loader.o $(OBJS)/2darray.o eomerge.cpp
+$(OBJS)/testSort.o:	utils/sortTester.cpp
+	$(CC) $(OMPFLAG) -c utils/sortTester.cpp -o $(OBJS)/testSort.o
+
+eomerge:	$(OBJS)/testSort.o $(OBJS)/merge.o $(OBJS)/array.o $(OBJS)/loader.o $(OBJS)/2darray.o eomerge.cpp
 	$(CC) $(CFLAGS) $(OMPFLAG) eomerge.cpp $(OBJS)/merge.o $(OBJS)/array.o $(OBJS)/loader.o $(OBJS)/2darray.o -o eomerge
 
 debug_ms: merge.cpp

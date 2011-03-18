@@ -20,7 +20,7 @@ eot_dbg: $(OBJS)/2darray.o eot.cpp
 	$(CC) $(CFLAGS) -DDEBUG_EOT eot.cpp $(OBJS)/*.o -o eot
 
 bitonicsort: bitonicmerge.cpp $(OBJS)/array.o $(OBJS)/2darray.o $(OBJS)/loader.o
-	$(CC) $(CFLAGS) $(OMPFLAG) bitonicmerge.cpp $(OBJS)/array.o $(OBJS)/2darray.o $(OBJS)/loader.o -o bitonicsort
+	$(CC) $(CFLAGS) $(OMPFLAG) $(OPTFLAG) bitonicmerge.cpp $(OBJS)/array.o $(OBJS)/2darray.o $(OBJS)/loader.o $(OBJS)/testSort.o -o bitonicsort
 
 clean:	
 	rm -rf eot $(OBJS)/*.o eot shearsort eomergesort a.out bitonicsort

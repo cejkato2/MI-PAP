@@ -3,7 +3,10 @@
 #include "../array.h"
 #include "../utils/2Darray.h"
 #include "../utils/loader.h"
+#include "../utils/sortTester.h"
 #include <omp.h>
+
+#define THREADS 4
 
 #define ASCENDING 0
 #define DESCENDING 1
@@ -28,7 +31,7 @@ void CompareAndExchange(int a[], int i, int j, int dir)
 	}
 }
 
-void BitonicMergeSort(int a[], int low, int size)
+void BitonicMergeSort(int a[], int low, int size,int numOfThreads)
 {
 
 	int stride;     //stride, kterym to budu delit (rika kolik toho budu slucovat) - zacina se na 2
@@ -40,9 +43,22 @@ void BitonicMergeSort(int a[], int low, int size)
 		//stride - aktualni zpracovavane velikosti bloku, tedka zpracovavat dokud nedostaneme velikost 1 (pocet bitonickych splitu)
 		//vypocteme aktualni smer zareni
 		int numOfArrows = size / stride;        //pocet hlavnich "sipek" s aktualnim stridem
+		
+		// zacatek privatnich promennych (pro kazde vlakno vlastni)
 		int actualArrow;                        //aktualni zvolena hlavni sipka
 		int dir;                                //aktualni smer zarezni pro hlavni sipku
+		int arrowBase;				//zakladna aktualni volene sipky
+		int actualSubiter;			//aktualni subiterace sipky
+		int numOfSubiters;			//pocet subiteraci
+		int lowIndex;				//spodni intex subiterace
+		int shift;				//posunuti v subiteraci
+                int median; 				//median pole pro bitonicky split
 
+		#pragma omp parallel shared(a,numOfArrows,stride) private(dir,tmpStride,arrowBase,actualArrow,numOfSubiters,actualSubiter,lowIndex,\
+		shift,median) num_threads(numOfThreads)
+		{
+		
+		#pragma omp for schedule(static)
 		for (actualArrow = 0; actualArrow < numOfArrows; actualArrow++) {
 			//tedka mam vybranou hlavni sipku, urcim jeji smer razeni
 			if ( (actualArrow % 2) == 1) {
@@ -53,24 +69,24 @@ void BitonicMergeSort(int a[], int low, int size)
 
 			//tedka musim rozkldat velkou sipku na sipky mensi to delame nez je stride roven 1
 			tmpStride =  stride;                    //zaciname s velkou sipkou
-			int arrowBase = actualArrow * stride;   //zacatek velke sipky
+			arrowBase = actualArrow * stride;   //zacatek velke sipky
 
 			//v kazde iteraci se musi upravit velikost stridu
 			for( ;tmpStride > 1 ; tmpStride/=2){
-				int numOfSubiters = stride / tmpStride;                         //pocet subiteraci v aktualnim zmensenem stridu
-				for (int actualSubiter = 0; actualSubiter < numOfSubiters; actualSubiter++) {
-					int lowIndex = arrowBase + actualSubiter * tmpStride;   //zacatek sipky subiterace
-					int median = tmpStride / 2;                             //median pole kam delat bitonic split
+				 numOfSubiters = stride / tmpStride;                         //pocet subiteraci v aktualnim zmensenem stridu	
+				for (actualSubiter = 0; actualSubiter < numOfSubiters; actualSubiter++) {
+					lowIndex = arrowBase + actualSubiter * tmpStride;   //zacatek sipky subiterace
+					median = tmpStride / 2;                             //median pole kam delat bitonic split
 					//bitonic split
-					for (int shift = 0; shift < median; shift++) {
+					for (shift = 0; shift < median; shift++) {
 						CompareAndExchange(a, lowIndex + shift, lowIndex + median + shift, dir);
 					}
 				}
 			}
 
 		}
+	   }
 	}
-
 }
 
 int main(int argc, char** argv)
@@ -88,15 +104,10 @@ int main(int argc, char** argv)
 	}
 
 
-	std::cout << "Input:" << std::endl;
+	BitonicMergeSort(a.getData(), 0, a.getSize(),THREADS);
 
-	a.print();
-
-	BitonicMergeSort(a.getData(), 0, a.getSize());
-
-	std::cout << "Output:" << std::endl;
-	a.print();
-
+	testSortedArray(a,1);
+	
 	return 0;
 }
 
