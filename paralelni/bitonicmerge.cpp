@@ -109,7 +109,7 @@ int main(int argc, char** argv)
 
 	timer = omp_get_wtime();
 
-	BitonicMergeSort(a.getData(), 0, a.getSize(), THREADS);
+	BitonicMergeSort(a.getData(), 0, a.getSize(), threads);
 
 	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 

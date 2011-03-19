@@ -16,7 +16,7 @@ int getRowDirection(int row)
 	}
 }
 
-void shearSort(Array2D& a, int rows, int cols)
+void shearSort(Array2D& a, int rows, int cols, int numOfThreads)
 {
 	int numOfPhases = 2 * ((int)floor(log2(rows))) + 1;
 
@@ -31,13 +31,13 @@ void shearSort(Array2D& a, int rows, int cols)
 		if ((phase % 2) == 0) {
 			//licha faze
 
-		#pragma omp parallel for shared(phase,rows,cols) private(row) schedule(dynamic,CHUNKSIZE)
+		#pragma omp parallel for shared(phase,rows,cols) private(row) schedule(dynamic,CHUNKSIZE) num_threads(numOfThreads)
 			for (row = 0; row < rows; row++) {
 				EOTRow(a, cols, row, getRowDirection(row)); //kazdy radek v jimem smeru
 			}
 		}else{
 			//suda fazei
-		#pragma omp parallel for shared(phase,rows,cols) private(col) schedule(dynamic,CHUNKSIZE)
+		#pragma omp parallel for shared(phase,rows,cols) private(col) schedule(dynamic,CHUNKSIZE) num_threads(numOfThreads)
 			for (col = 0; col < cols; col++) {
 				EOTColumn(a, rows, col, ASCENDING); //serad vsechny sloupce smerem dolu
 			}
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 	std::cout << "\n";
 	#endif
 
-	shearSort(a, a.getSizeX(), a.getSizeY());
+	shearSort(a, a.getSizeX(), a.getSizeY(), threads);
 
 	#ifdef DEBUG_OUTPUT
 	std::cout << "Setříděné pole:\n" << std::endl;

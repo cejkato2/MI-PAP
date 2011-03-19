@@ -5,18 +5,18 @@
 #include "../utils/2Darray.h"
 #include "../utils/loader.h"
 
-void oddEvenMergeSort(int *a, int size, int lo, int n);
+void oddEvenMergeSort(int *a, int size, int lo, int n, int threads);
 void oddEvenMerge(int *a, int size, int lo, int n, int r);
 void compare(int *a, int i, int j);
 void exchange(int *a, int i, int j);
 
-void oddEvenMergeSort(int *a, int size, int lo, int n)
+void oddEvenMergeSort(int *a, int size, int lo, int n, int threads)
 {
-//std::cout << "oddEvenMergeSort(" << lo << ", " << n << ")" << std::endl;
+	std::cout << "oddEvenMergeSort(" << lo << ", " << n << ")" << std::endl;
 	if (n > 1) {
 		int m = n / 2;
-		oddEvenMergeSort(a, size, lo, m);
-		oddEvenMergeSort(a, size, lo + m, m);
+		oddEvenMergeSort(a, size, lo, m, threads);
+		oddEvenMergeSort(a, size, lo + m, m, threads);
 		oddEvenMerge(a, size, lo, n, 1);
 	}
 }
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 	std::cout << "\n";
 	#endif
 
-	oddEvenMergeSort(a.getData(), a.getSize(), 0, a.getSize());
+	oddEvenMergeSort(a.getData(), a.getSize(), 0, a.getSize(), threads);
 
 	#ifdef DEBUG_OUTPUT
 	std::cout << "Setříděné pole:\n" << std::endl;
