@@ -152,6 +152,7 @@ void loadValues(char *filename, Array &array, int amount)
 	std::ifstream in;
 
 	if (amount > 0) {
+                srandom(1);
 		for (int i = 0; i < amount; ++i) {
 			array.addValue((int)random());
 		}

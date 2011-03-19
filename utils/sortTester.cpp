@@ -12,7 +12,7 @@ void testSortedArray(Array& a, int numOfThreads)
 	int i;
 	int ok;
 
-	std::cout << "Zacinam kontrolovat pole -->" << std::endl;
+	//std::cout << "Zacinam kontrolovat pole -->" << std::endl;
 
 #pragma omp parallel shared(b,ok,size) private(i) num_threads(numOfThreads)
 	{
@@ -28,7 +28,7 @@ void testSortedArray(Array& a, int numOfThreads)
 
 	#pragma omp master
 		if (ok == 1) {
-			std::cout << "Pole je zesortovane" << std::endl;
+			//std::cout << "Pole je zesortovane" << std::endl;
 		}else{
 			std::cout << "Pole neni zesortovane" << std::endl;
 		}
