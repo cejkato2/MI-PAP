@@ -1,26 +1,25 @@
 include ../Makefile.inc
 
 OBJS=../obj
+BIN=../bin/paralelni
 
-all: eomergesort shearsort bitonicsort
+all: $(BIN)/eomergesort $(BIN)/shearsort $(BIN)/bitonicsort
 
-eomergesort: $(OBJS)/array.o $(OBJS)/loader.o eomergesort.cpp
-	$(CC) $(CFLAGS) $(OMPFLAG) eomergesort.cpp $(OBJS)/*.o -o eomergesort
+$(BIN)/bitonicsort: bitonicmerge.cpp $(OBJS)/array.o $(OBJS)/2darray.o $(OBJS)/loader.o $(OBJS)/eot.o
+	$(CC) $(CFLAGS) $(OMPFLAG) $(OPTFLAG) bitonicmerge.cpp $(OBJS)/array.o $(OBJS)/2darray.o $(OBJS)/loader.o $(OBJS)/eot.o $(OBJS)/testSort.o -o $(BIN)/bitonicsort
 
-shearsort: $(OBJS)/2darray.o $(OBJS)/loader.o $(OBJS)/eot.o shearsort.cpp
-	$(CC) $(CFLAGS) $(OMPFLAG) shearsort.cpp $(OBJS)/*.o -o shearsort
+
+$(BIN)/eomergesort: $(OBJS)/array.o $(OBJS)/loader.o eomergesort.cpp
+	$(CC) $(CFLAGS) $(OMPFLAG) eomergesort.cpp $(OBJS)/array.o $(OBJS)/loader.o $(OBJS)/2darray.o $(OBJS)/testSort.o -o $(BIN)/eomergesort
+
+$(BIN)/shearsort: $(OBJS)/2darray.o $(OBJS)/loader.o $(OBJS)/eot.o shearsort.cpp
+	$(CC) $(CFLAGS) $(OMPFLAG) shearsort.cpp $(OBJS)/*.o -o $(BIN)/shearsort
 
 $(OBJS)/eot.o:	eot.h eot.cpp
 	$(CC) -c eot.cpp -o $(OBJS)/eot.o
 
-$(OBJS)/2darray.o:	../utils/2Darray.cpp
-	$(CC) -c ../utils/2Darray.cpp -o $(OBJS)/2darray.o 
-
 eot_dbg: $(OBJS)/2darray.o eot.cpp
 	$(CC) $(CFLAGS) -DDEBUG_EOT eot.cpp $(OBJS)/*.o -o eot
-
-bitonicsort: bitonicmerge.cpp $(OBJS)/array.o $(OBJS)/2darray.o $(OBJS)/loader.o
-	$(CC) $(CFLAGS) $(OMPFLAG) $(OPTFLAG) bitonicmerge.cpp $(OBJS)/array.o $(OBJS)/2darray.o $(OBJS)/loader.o $(OBJS)/testSort.o -o bitonicsort
 
 clean:	
 	rm -rf eot $(OBJS)/*.o eot shearsort eomergesort a.out bitonicsort

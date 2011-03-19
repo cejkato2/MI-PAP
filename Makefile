@@ -2,13 +2,15 @@ include Makefile.inc
 
 OBJS=obj
 
-all: eomerge sekvencni paralelni
+all: sekvencni paralelni
 
-$(OBJS)/merge.o:	merge.cpp
-	$(CC) -c merge.cpp -o $(OBJS)/merge.o
+utils: $(OBJS)/merge.o $(OBJS)/array.o $(OBJS)/2darray.o $(OBJS)/loader.o $(OBJS)/testSort.o
 
-$(OBJS)/array.o:	array.cpp
-	$(CC) -c array.cpp -o $(OBJS)/array.o
+$(OBJS)/merge.o:	utils/merge.cpp
+	$(CC) -c utils/merge.cpp -o $(OBJS)/merge.o
+
+$(OBJS)/array.o:	utils/array.cpp
+	$(CC) -c utils/array.cpp -o $(OBJS)/array.o
 
 $(OBJS)/2darray.o:	utils/2Darray.cpp
 	$(CC) -c utils/2Darray.cpp -o $(OBJS)/2darray.o 
@@ -19,21 +21,15 @@ $(OBJS)/loader.o:	utils/loader.cpp
 $(OBJS)/testSort.o:	utils/sortTester.cpp
 	$(CC) $(OMPFLAG) -c utils/sortTester.cpp -o $(OBJS)/testSort.o
 
-eomerge:	$(OBJS)/testSort.o $(OBJS)/merge.o $(OBJS)/array.o $(OBJS)/loader.o $(OBJS)/2darray.o eomerge.cpp
-	$(CC) $(CFLAGS) $(OMPFLAG) eomerge.cpp $(OBJS)/merge.o $(OBJS)/array.o $(OBJS)/loader.o $(OBJS)/2darray.o -o eomerge
-
-debug_ms: merge.cpp
-	$(CC) $(CFLAGS) -DDEBUG_MERGESORT merge.cpp -o merge
-
 clean: 
-	rm -f merge eomerge testloader $(OBJS)/*.o a.out
+	rm -f testloader $(OBJS)/*.o a.out bin/*/*
 	cd sekvencni; make clean
 	cd paralelni; make clean
 
-sekvencni: force_make 	
+sekvencni: utils force_make 	
 	cd sekvencni/ && $(MAKE)
 
-paralelni: force_make
+paralelni: utils force_make
 	cd paralelni/ && $(MAKE)
 
 force_make:

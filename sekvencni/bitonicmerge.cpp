@@ -2,7 +2,7 @@
 #include <stack>
 #include <iostream>
 #include <omp.h>
-#include "../array.h"
+#include "../utils/array.h"
 #include "../utils/2Darray.h"
 #include "../utils/loader.h"
 
@@ -177,20 +177,26 @@ void BitonicMergeSort(int a[], int low, int count, int direction)
 
 int main(int argc, char** argv)
 {
+	//for time measurement:
 	double timer;
+
+	//for setting parameters:
 	char *filename = NULL;
+	int threads, array_size;
+
+	//data container:
 	Array a;
 
-	timer = omp_get_wtime();
-
-
-	getFilename(&filename, argc, argv);
-	loadValues(filename, a);
+	getSettings(&filename, &array_size, &threads, argc, argv);
+	loadValues(filename, a, array_size);
 
 	if (a.isEmpty() == true) {
 		std::cerr << "No input values" << std::endl;
 		return 1;
 	}
+
+	timer = omp_get_wtime();
+
 
 	#ifdef DEBUG_OUTPUT
 	std::cout << "Input:" << std::endl;

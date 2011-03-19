@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <omp.h>
 #include "../utils/2Darray.h"
-#include "../array.h"
+#include "../utils/array.h"
 #include "../utils/loader.h"
 #include "eot.h"
 
@@ -51,20 +51,25 @@ void generateTable(Array2D& a, int x, int y);
 
 int main(int argc, char** argv)
 {
-	char *filename;
+	//for time measurement:
 	double timer;
+
+	//for setting parameters:
+	char *filename = NULL;
+	int threads, array_size;
+
+	//data container:
 	Array2D a(0, 0);
 
-	timer = omp_get_wtime();
-
-	getFilename(&filename, argc, argv);
-	loadValues(filename, &a);
+	getSettings(&filename, &array_size, &threads, argc, argv);
+	loadValues(filename, &a, array_size);
 
 	if (a.getSize() == 0) {
 		std::cerr << "No input values" << std::endl;
 		return 1;
 	}
 
+	timer = omp_get_wtime();
 
 	#ifdef DEBUG_OUTPUT
 	std::cout << "Vstupní pole:\n" << std::endl;
