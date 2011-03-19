@@ -1,0 +1,4 @@
+./bin/paralelni/eomergesort -n25 -t8
+==> queue_12_1slots_per_host_job.sh.o107088 <==
+Elapsed time: 156.214s
+

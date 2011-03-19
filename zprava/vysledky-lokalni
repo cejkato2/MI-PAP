@@ -1,0 +1,41 @@
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n25 -t1
+Elapsed time: 503.529s
+[tomas@localhost repo]$ bin/sekvencni/eomergesort -n25 -t1
+Elapsed time: 509.989s
+
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n25 -t2
+Elapsed time: 382.494s
+
+
+------------------------------------------------------------
+
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t1
+Elapsed time: 2.56341s
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t2
+Elapsed time: 1.71361s
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t4
+Elapsed time: 1.73638s
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t8
+Elapsed time: 1.83057s
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t16
+Elapsed time: 1.88173s
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t32
+Elapsed time: 1.96014s
+
+
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t32
+Elapsed time: 2.58952s
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t16
+Elapsed time: 2.39095s
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t8
+Elapsed time: 2.1257s
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t4
+Elapsed time: 1.91443s
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t2
+Elapsed time: 1.79298s
+[tomas@localhost repo]$ bin/paralelni/eomergesort -n19 -t1
+Elapsed time: 2.52478s
+
+
+------------------------------------------------------------
+
