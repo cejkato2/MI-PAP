@@ -23,6 +23,7 @@ $(OBJS)/testSort.o:	utils/sortTester.cpp
 
 clean: 
 	rm -f testloader $(OBJS)/*.o a.out bin/*/*
+	rm -rf tests
 	cd sekvencni; make clean
 	cd paralelni; make clean
 
@@ -42,3 +43,7 @@ to_star:
 
 testloader: testloader.cpp
 	$(CC) $(CFLAGS) $(OMPFLAG) array.cpp utils/loader.cpp utils/2Darray.cpp testloader.cpp -o testloader
+
+gentests: all
+	utils/testmes.sh
+
