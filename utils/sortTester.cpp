@@ -6,8 +6,8 @@
 void testSortedArray(Array& a, int numOfThreads)
 {
 
-	int* b = a.getData();
-	int size = a.getSize();
+	int* b;
+	int size;
 
 	int i;
 	int ok;
@@ -17,7 +17,11 @@ void testSortedArray(Array& a, int numOfThreads)
 #pragma omp parallel shared(b,ok,size) private(i) num_threads(numOfThreads)
 	{
 	#pragma omp master
+	{
 		ok = 1;
+		b = a.getData();
+		size = a.getSize();
+	}
 
 	#pragma for schedule(static)
 		for (i = 1; i < size; i++) {
