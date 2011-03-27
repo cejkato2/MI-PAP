@@ -30,7 +30,7 @@ void shearSort(Array2D& a, int rows, int cols, int numOfThreads)
 	int row, col;
 	int phase;
 
-	#pragma omp parallel shared(a,phase,rows,cols,numOfPhases) private(auxRow,auxCol,row,col) num_threads(numOfThreads)
+	#pragma omp parallel shared(phase,rows,cols,numOfPhases) private(auxRow,auxCol,row,col) num_threads(numOfThreads)
 	{
 
 		//hlavni vlakno nastavi aktualni fazi na 0
@@ -102,18 +102,18 @@ int main(int argc, char** argv)
 
 	timer = omp_get_wtime();
 
-		#ifdef DEBUG_OUTPUT
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Vstupní pole:\n" << std::endl;
 	a.print();
 	std::cout << "\n";
-		#endif
+	#endif
 
 	shearSort(a, a.getSizeX(), a.getSizeY(), threads);
 
-		#ifdef DEBUG_OUTPUT
+	#ifdef DEBUG_OUTPUT
 	std::cout << "Setříděné pole:\n" << std::endl;
 	a.print();
-		#endif
+	#endif
 
 	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 
