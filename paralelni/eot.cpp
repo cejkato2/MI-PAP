@@ -1,20 +1,20 @@
-#include <stdio.h>
-#include <math.h>
-#include <omp.h>
-#include "../utils/2Darray.h"
-#include "eot.h"
+	#include <stdio.h>
+	#include <math.h>
+	#include <omp.h>
+	#include "../utils/2Darray.h"
+	#include "eot.h"
 
-void swap(Array2D& a, int i1, int j1, int i2, int j2)
-{
-	int val1 = a.getValueAt(i1, j1);
-	int val2 = a.getValueAt(i2, j2);
+	void swap(Array2D& a, int i1, int j1, int i2, int j2)
+	{
+		int val1 = a.getValueAt(i1, j1);
+		int val2 = a.getValueAt(i2, j2);
 
-	a.setValueAt(val2, i1, j1);
-	a.setValueAt(val1, i2, j2);
+		a.setValueAt(val2, i1, j1);
+		a.setValueAt(val1, i2, j2);
 
-}
+	}
 
-//vrati true, pokud je poradi spravne
+	//vrati true, pokud je poradi spravne
 bool compare(int val1, int val2, int direction)
 {
 	bool retVal = false;

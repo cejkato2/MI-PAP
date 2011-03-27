@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <cstdlib>
-#include "shearmergesort.h"
 #include "../utils/2Darray.h"
+#include "shearmergesort.h"
 
 /**
  * Komparace podle smyslu razeni.
@@ -30,34 +30,35 @@ bool compare(int val1, int val2, int dir)
 }
 
 /**
-* Podle metody pristupu vratime prvek z daneho pole
-*/
-int getArrayValue (Array2D& a,int fixPos,int iter,int arrAcc)
+ * Podle metody pristupu vratime prvek z daneho pole
+ */
+int getArrayValue(Array2D& a, int fixPos, int iter, int arrAcc)
 {
 	int retVal = 0;
+
 	//radkovy pristup - zafixujeme radek, menime sloupec
-	if(arrAcc == ROW){
-		retVal = a.getValueAt(fixPos,iter);
+	if (arrAcc == ROW) {
+		retVal = a.getValueAt(fixPos, iter);
 	}
 
 	//sloupcovy pristup - zafixujeme sloupec
-	if(arrAcc == COLUMN){
-		retVal = a.getValueAt(iter,fixPos);
+	if (arrAcc == COLUMN) {
+		retVal = a.getValueAt(iter, fixPos);
 	}
-return retVal;
+	return retVal;
 }
 
 //to same co predtim, ale operace ukladani
-void setArrayValue (Array2D& a,int fixPos,int iter,int val,int arrAcc)
+void setArrayValue(Array2D& a, int fixPos, int iter, int val, int arrAcc)
 {
 	//radkovy pristup - zafixujeme radek, menime sloupec
-	if(arrAcc == ROW){
-		a.setValueAt(val,fixPos,iter);
+	if (arrAcc == ROW) {
+		a.setValueAt(val, fixPos, iter);
 	}
 
 	//sloupcovy pristup - zafixujeme sloupec
-	if(arrAcc == COLUMN){
-		 a.setValueAt(val,iter,fixPos);
+	if (arrAcc == COLUMN) {
+		a.setValueAt(val, iter, fixPos);
 	}
 }
 
@@ -68,7 +69,7 @@ void setArrayValue (Array2D& a,int fixPos,int iter,int val,int arrAcc)
  * @param left prvni index, na ktery smim sahnout
  * @param right posledni index, na ktery smim sahnout
  */
-void merge(Array2D& a, int aux[], int left, int right,int fixedPoint, int arrayAcces, int dir)
+void merge(Array2D& a, int aux[], int left, int right, int fixedPoint, int arrayAcces, int dir)
 {
 	int middleIndex = (left + right) / 2;
 	int leftIndex = left;
@@ -76,27 +77,27 @@ void merge(Array2D& a, int aux[], int left, int right,int fixedPoint, int arrayA
 	int auxIndex = left;
 
 	while (leftIndex <= middleIndex && rightIndex <= right) {
-		if ( compare(	getArrayValue(a,fixedPoint,leftIndex,arrayAcces), //data
-				getArrayValue(a,fixedPoint,rightIndex,arrayAcces),//data
-				dir)) {						  //smer razeni
-			aux[auxIndex] = getArrayValue(a,fixedPoint,leftIndex++,arrayAcces);
+		if ( compare(   getArrayValue(a, fixedPoint, leftIndex, arrayAcces),    //data
+				getArrayValue(a, fixedPoint, rightIndex, arrayAcces),   //data
+				dir)) {                                                 //smer razeni
+			aux[auxIndex] = getArrayValue(a, fixedPoint, leftIndex++, arrayAcces);
 		}else{
-			aux[auxIndex] = getArrayValue(a,fixedPoint,rightIndex++,arrayAcces);
+			aux[auxIndex] = getArrayValue(a, fixedPoint, rightIndex++, arrayAcces);
 		}
 		auxIndex++;
 	}
 	while (leftIndex <= middleIndex) {
-		aux[auxIndex] = getArrayValue(a,fixedPoint,leftIndex++,arrayAcces);
+		aux[auxIndex] = getArrayValue(a, fixedPoint, leftIndex++, arrayAcces);
 		auxIndex++;
 	}
 	while (rightIndex <= right) {
-		aux[auxIndex] = getArrayValue(a,fixedPoint,rightIndex++,arrayAcces);
+		aux[auxIndex] = getArrayValue(a, fixedPoint, rightIndex++, arrayAcces);
 		auxIndex++;
 	}
 
 	for (int i = left; i <= right; i++) {
-		setArrayValue(a,fixedPoint,i,aux[i],arrayAcces);
-		
+		setArrayValue(a, fixedPoint, i, aux[i], arrayAcces);
+
 	}
 }
 
@@ -108,13 +109,13 @@ void merge(Array2D& a, int aux[], int left, int right,int fixedPoint, int arrayA
  * @param fixedPoint - fixnuty bod v pristupu k datum(muzem zafixovat radek nebo sloupec)
  * @param dir smer razeni
  */
-void mergeSort(Array2D& a, int aux[], int left, int right, int fixedPoint, int arrayAcces,int dir)
+void mergeSort(Array2D& a, int aux[], int left, int right, int fixedPoint, int arrayAcces, int dir)
 {
 	if (left == right) return;
 	int middleIndex = (left + right) / 2;
 	mergeSort(a, aux, left, middleIndex, fixedPoint, arrayAcces, dir);
 	mergeSort(a, aux, middleIndex + 1, right, fixedPoint, arrayAcces, dir);
-	merge(a, aux, left, right, fixedPoint, arrayAcces,dir);
+	merge(a, aux, left, right, fixedPoint, arrayAcces, dir);
 
 }
 
@@ -123,7 +124,7 @@ void mergeSort(Array2D& a, int aux[], int left, int right, int fixedPoint, int a
 #ifdef DEBUG_MERGESORT
 
 void generateTable(Array2D& a, int x, int y)
-	{
+{
 	for (int i = 0; i < x; i++) {
 		for (int j = 0; j < y; j++) {
 			int num = (rand() % 100) + 1;
@@ -134,15 +135,15 @@ void generateTable(Array2D& a, int x, int y)
 
 int main(int argc, char** argv)
 {
-	Array2D a(4,4);
+	Array2D a(4, 4);
 	int* aux = new int[4];
-	
-	generateTable(a,4,4);
-	
+
+	generateTable(a, 4, 4);
+
 	printf("Vstupni pole\n:");
 	a.print();
 	printf("\n\n");
-	
+
 	mergeSort(a, aux, 0, 3, 1, ROW, ASCENDING);
 
 	printf("Vytupni pole\n:");

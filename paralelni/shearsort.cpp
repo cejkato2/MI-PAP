@@ -5,7 +5,7 @@
 #include "../utils/2Darray.h"
 #include "../utils/array.h"
 #include "../utils/loader.h"
-#include "eot.h"
+#include "shearmergesort.h"
 
 int getRowDirection(int row)
 {
@@ -19,27 +19,28 @@ int getRowDirection(int row)
 void shearSort(Array2D& a, int rows, int cols, int numOfThreads)
 {
 	int numOfPhases = 2 * ((int)floor(log2(rows))) + 1;
+	int* auxRow = new int[rows];
+	int* auxCols = new int[cols];
 
 	#ifdef DEBUG_OUTPUT
 	std::cout << "Počet fází:" << numOfPhases << std::endl;
-//0 - je prvni liche cislo
-//1 - je prvni sude cislo
+	//0 - je prvni liche cislo
+	//1 - je prvni sude cislo
 	#endif
 	int row, col;
 	for (int phase = 0; phase < numOfPhases; phase++) {
 
 		if ((phase % 2) == 0) {
-			//licha faze
-
-		#pragma omp parallel for shared(phase,rows,cols) private(row) schedule(dynamic,CHUNKSIZE) num_threads(numOfThreads)
+			//licha faze - razeni radku
 			for (row = 0; row < rows; row++) {
-				EOTRow(a, cols, row, getRowDirection(row)); //kazdy radek v jimem smeru
+				//proved MergeSort na radkovy vektor v danem smeru razeni s pritupem po radcich 
+				mergeSort(a, auxRow, 0, cols-1, row, ROW, getRowDirection(row));
 			}
 		}else{
-			//suda fazei
-		#pragma omp parallel for shared(phase,rows,cols) private(col) schedule(dynamic,CHUNKSIZE) num_threads(numOfThreads)
+			//suda faze - razeni sloupcu
 			for (col = 0; col < cols; col++) {
-				EOTColumn(a, rows, col, ASCENDING); //serad vsechny sloupce smerem dolu
+				//proved MergeSort na sloupcovy vektor v vzestupnem razeni s pristupem po sloupcich
+				mergeSort(a, auxCols, 0, rows-1, col, COLUMN, ASCENDING);
 			}
 		}
 	}

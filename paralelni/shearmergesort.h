@@ -15,6 +15,6 @@
  * @param left left index of array for sorting
  * @param right right index of array for sorting
  */
-void mergeSort(int array[], int aux[], int left, int right, int fixedPoint, int arrayAcces, int dir);
+void mergeSort(Array2D& a, int aux[], int left, int right, int fixedPoint, int arrayAcces, int dir);
 
 #endif

@@ -57,21 +57,21 @@ void BitonicMergeSort(int a[], int low, int size, int numOfThreads)
 	{
 
 	#pragma omp master
-	stride = 2;
-	
+		stride = 2;
+
 	#pragma omp barrier
 
 		while (stride <= size) {
 
 		#pragma omp master
-		numOfArrows = size / stride;       //pocet hlavnich "sipek" s aktualnim stridem
+			numOfArrows = size / stride; //pocet hlavnich "sipek" s aktualnim stridem
 
 		#pragma omp barrier
 
 			//stride - aktualni zpracovavane velikosti bloku, tedka zpracovavat dokud nedostaneme velikost 1 (pocet bitonickych splitu)
 		#pragma omp for schedule(static)
 			for (actualArrow = 0; actualArrow < numOfArrows; actualArrow++) {
-					//tedka mam vybranou hlavni sipku, urcim jeji smer razeni
+				//tedka mam vybranou hlavni sipku, urcim jeji smer razeni
 				if ( (actualArrow % 2) == 1) {
 					dir = DESCENDING;       //licha sipka -> sestupne
 				}else{
@@ -97,10 +97,10 @@ void BitonicMergeSort(int a[], int low, int size, int numOfThreads)
 				}
 
 			}
-			
-			#pragma omp master 
-			stride*=2;
-			
+
+			#pragma omp master
+			stride *= 2;
+
 		}
 	}
 }
