@@ -13,7 +13,7 @@ $(BIN)/eomergesort: $(OBJS)/array.o $(OBJS)/loader.o eomergesort.cpp
 	$(CC) $(CFLAGS) $(OMPFLAG) eomergesort.cpp $(OBJS)/array.o $(OBJS)/loader.o $(OBJS)/2darray.o $(OBJS)/testSort.o -o $(BIN)/eomergesort
 
 $(BIN)/shearsort: $(OBJS)/2darray.o $(OBJS)/loader.o $(OBJS)/shearmergesort.o shearsort.cpp
-	$(CC) $(CFLAGS) $(OMPFLAG) shearsort.cpp $(OBJS)/*.o -o $(BIN)/shearsort
+	$(CC) $(CFLAGS) $(OMPFLAG) $(OPTFLAG) shearsort.cpp $(OBJS)/*.o -o $(BIN)/shearsort
 
 #eot zatim neni potreba
 #$(OBJS)/eot.o:	eot.h eot.cpp

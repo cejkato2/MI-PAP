@@ -19,8 +19,8 @@ int getRowDirection(int row)
 void shearSort(Array2D& a, int rows, int cols, int numOfThreads)
 {
 	int numOfPhases = 2 * ((int)floor(log2(rows))) + 1;
-	int* auxRow = new int[rows];
-	int* auxCols = new int[cols];
+	int* auxRow;
+	int* auxCol;
 
 	#ifdef DEBUG_OUTPUT
 	std::cout << "Počet fází:" << numOfPhases << std::endl;
@@ -28,21 +28,51 @@ void shearSort(Array2D& a, int rows, int cols, int numOfThreads)
 	//1 - je prvni sude cislo
 	#endif
 	int row, col;
-	for (int phase = 0; phase < numOfPhases; phase++) {
+	int phase;
 
-		if ((phase % 2) == 0) {
-			//licha faze - razeni radku
-			for (row = 0; row < rows; row++) {
-				//proved MergeSort na radkovy vektor v danem smeru razeni s pritupem po radcich 
-				mergeSort(a, auxRow, 0, cols-1, row, ROW, getRowDirection(row));
+	#pragma omp parallel shared(a,phase,rows,cols,numOfPhases) private(auxRow,auxCol,row,col) num_threads(numOfThreads)
+	{
+
+		//hlavni vlakno nastavi aktualni fazi na 0
+	#pragma omp master
+		phase = 0;
+
+		//kazdy si inicializuje svuj buffer
+		auxRow = new int[rows];
+		auxCol = new int[cols];
+
+		//pockaji na sebe
+	#pragma omp barrier
+
+		while (phase < numOfPhases) {
+
+			if ((phase % 2) == 0) {
+				//licha faze - razeni radku
+			#pragma omp for schedule(static)
+				for (row = 0; row < rows; row++) {
+					//proved MergeSort na radkovy vektor v danem smeru razeni s pritupem po radcich
+					mergeSort(a, auxRow, 0, cols - 1, row, ROW, getRowDirection(row));
+				}
+			}else{
+				//suda faze - razeni sloupcu
+			#pragma omp for schedule(static)
+				for (col = 0; col < cols; col++) {
+					//proved MergeSort na sloupcovy vektor v vzestupnem razeni s pristupem po sloupcich
+					mergeSort(a, auxCol, 0, rows - 1, col, COLUMN, ASCENDING);
+				}
 			}
-		}else{
-			//suda faze - razeni sloupcu
-			for (col = 0; col < cols; col++) {
-				//proved MergeSort na sloupcovy vektor v vzestupnem razeni s pristupem po sloupcich
-				mergeSort(a, auxCols, 0, rows-1, col, COLUMN, ASCENDING);
-			}
+
+			//master inkrementuje
+	#pragma omp master
+			phase++;
+
+	#pragma omp barrier
+
 		}
+
+		//kazde vlakno po sobe uklidi
+		delete[] auxRow;
+		delete[] auxCol;
 	}
 }
 
@@ -72,18 +102,18 @@ int main(int argc, char** argv)
 
 	timer = omp_get_wtime();
 
-	#ifdef DEBUG_OUTPUT
+		#ifdef DEBUG_OUTPUT
 	std::cout << "Vstupní pole:\n" << std::endl;
 	a.print();
 	std::cout << "\n";
-	#endif
+		#endif
 
 	shearSort(a, a.getSizeX(), a.getSizeY(), threads);
 
-	#ifdef DEBUG_OUTPUT
+		#ifdef DEBUG_OUTPUT
 	std::cout << "Setříděné pole:\n" << std::endl;
 	a.print();
-	#endif
+		#endif
 
 	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 
