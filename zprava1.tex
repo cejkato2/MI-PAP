@@ -1,0 +1,235 @@
+\documentclass[12pt]{article}
+%\usepackage{epsf,epic,eepic,eepicemu}
+%\documentstyle[epsf,epic,eepic,eepicemu]{article}
+%\usepackage[cp1250]{inputenc}
+\usepackage[utf8]{inputenc}
+\usepackage[czech, english]{babel}
+\usepackage{czech}
+\usepackage[T1]{fontenc} 
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{lmodern}
+\usepackage{float}
+
+
+
+\begin{document}
+%\oddsidemargin=-5mm \evensidemargin=-5mm \marginparwidth=.08in
+%\marginparsep=.01in \marginparpush=5pt \topmargin=-15mm
+%\headheight=12pt \headsep=25pt \footheight=12pt \footskip=30pt
+%\textheight=25cm \textwidth=17cm \columnsep=2mm \columnseprule=1pt
+%\parindent=15pt\parskip=2pt
+
+\begin{center}
+\bf Semestrální projekt MI-PAP 2010/2011:\\[5mm]
+    Paralelní řadící algoritmy\\[5mm]
+    Pavel Benáček\\   
+    Tomáš Čejka\\[2mm]
+magisterské studijum, FIT ČVUT, Kolejní 550/2, 160 00 Praha 6\\[2mm]
+\today
+\end{center}
+
+\section{Definice problému a popis sekvenčního algoritmu}
+Podle zadání semestrální práce je úkolem implementace aspoň tří z následujících
+řadících algoritmů: Shearsort, 3D sort, Sudo-lichý Mergesort a Bitonic sort.
+
+Pro řešení jsme si vybrali algoritmy Shearsort, Sudo-lichý Mergesort a Bitonic sort.
+
+Pro účely měření času běhu výsledných programů a porovnání paralelních algoritmů se sekvenčním
+řazením jsme si implementovali sekvenční algoritmus Mergesort a ten vzali jako referenční sekvenční
+řešení.
+
+Semestrální práce spočívala v implementaci vybraných řadících algoritmů jako sekvenční řešení, paralelní
+řešení na počítači se sdílenou pamětí s použítím knihovny OpenMP a následně s využitím technologie CUDA
+společnosti NVIDIA$^{\tiny{\textregistered}}$.
+
+\section{Popis paralelního algoritmu a jeho implementace v OpenMP}
+\subsection{Sudo-lichý mergesort}
+Algoritmus Sudo-lichý mergesort je navržen na strukturu řadící sítě, kterou si můžeme představit jako
+systém s distribuovanou pamětí, který obsahuje množinu procesorů uspořádaných do mřížky a vhodně pospojovaných.
+
+Algoritmus funguje tak, že na vstup systému se přivede množina dat, která se během průchodu sítí seřadí.
+
+Řešení paralelizace s knihovou OpenMP pracuje na počítači se sdílenou pamětí, není potřeba množinu dat
+rozdělovat na dílčí části a distribuovat/rozkopírovat je mezi procesory. Místo toho jsou veškerá data
+umístěna v paměti v jednom poli a jednotlivá paralelní vlákna přistupují k disjunktním oblastem sdíleného
+pole.
+
+Snažili jsme se o co nejrovnoměrnější rozdělení dat mezi vlákna, takže data virtuálně rozdělíme na začátku
+programu na stejné části, jejichž počet je rovný nějaké mocnině dvou a jednotlivá vlákna seřadí tuto podposloupnost
+dat. Tento přístup je možný díky rekurzivní povaze algoritmu a řadících sítí.
+Po seřazení podposloupností je potřeba ještě provést jejich sloučení. Sloučení se provádí v logaritmickém čase,
+protože .....
+\subsection{Bitonic sort}
+
+\subsection{Shearsort}
+
+\section{Naměřené výsledky a vyhodnocení}
+\subsection{Způsob měření}
+
+\subsection{Naměřené časy}
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|r|}
+\hline
+Počet CPU & A & B & C\\
+\hline
+1 & 321,8 & 307,3 & 338,6\\
+\hline
+2 & 38,95370 & 35,46150 & 40,27100\\
+\hline
+4 & 12,20080 & 12,45520 & 21,30230\\
+\hline
+8 & 7,14178 & 10,43290 & 15,05280\\
+\hline
+16 & 6,55517 & 8,99971 & 11,43290\\
+\hline
+24 & 6,21340 & 7,14230 & 8,85400\\
+\hline
+32 & 6,24150 & 7,13790 & 8,42100\\
+\hline
+\end{tabular} 
+\end{center}
+\caption{Propojovací síť InfiniBand}
+\end{table}
+
+\subsection{Spočítané zrychlení}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|r|}
+\hline
+Počet CPU & A & B & C\\
+\hline
+1 & 1 & 1 & 1\\
+\hline
+2 & 8,15 & 8,78 & 8,99\\
+\hline
+4 & 24,40 & 24,84 & 16,55\\
+\hline
+8 & 41,18 & 29,26 & 23,92\\
+\hline
+16 & 42,81 & 35,45 & 31,66\\
+\hline
+24 & 45,03 & 42,86 & 37,77\\
+\hline
+32 & 46,48 & 42,32 & 38,55\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Zrychlení Propojovací síť Ethernet}
+\end{table}
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|r|}
+\hline
+Počet CPU & A & B & C\\
+\hline
+1 & 1 & 1 & 1\\
+\hline
+2 & 8,26 & 9,00 & 8,99\\
+\hline
+4 & 26,38 & 25,61 & 16,99\\
+\hline
+8 & 45,06 & 30,58 & 24,05\\
+\hline
+16 & 49,09 & 35,45 & 31,66\\
+\hline
+24 & 51,79 & 44,66 & 40,89\\
+\hline
+32 & 51,56 & 44,69 & 42,99\\
+\hline
+\end{tabular} 
+\end{center}
+\caption{Zrychlení Propojovací síť InfiniBand}
+\end{table}
+Zrychlení nám vyšlo superlineární pro všechna měření paralelní úlohy, 
+protože platí $$S > p$$, kde \(S\) je zrychlení a \(p\) je počet procesorů. Důvodem takového zrychlení je vhodné rozesílání
+nejlepších dosažených výsledků a tím i četné ořezávání stavového prostoru.
+
+\subsection{Vyhodnocení}
+
+\section{Závěr}
+
+\section{Literatura}
+\begin{enumerate}
+\item \href{https://edux.fit.cvut.cz/courses/MI-PAR/labs/prohledavani_do_hloubky}{Stránky cvičení - prohledávání do hloubky}
+\item \href{https://edux.fit.cvut.cz/courses/MI-PAR/labs/poznamky_k_implementaci}{Stránky cvičení - poznámky k implementaci}
+\end{enumerate}
+
+
+\appendix
+\section{Grafy závislosti času na počtu vláken}
+\subsection{Propojovací síť InfiniBand}
+Grafy závislosti času na počtu procesorů při použití propojovací sítě InfiniBand.
+\begin{figure}[H]
+\begin{center}
+%\includegraphics[width=8cm]{grafy-zprava/testAinfib.png}
+\caption{Test A}
+\label{fig:testAinfib}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+%\includegraphics[width=8cm]{grafy-zprava/testBinfib.png}
+\caption{Test B}
+\label{fig:testBinfib}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+%\includegraphics[width=8cm]{grafy-zprava/testCinfib.png}
+\caption{Test C}
+\label{fig:testCinfib}
+\end{center}
+\end{figure}
+
+\subsection{Propojovací síť Ethernet}
+Grafy závislosti času na počtu procesorů při použití propojovací sítě Ethernet.
+\begin{figure}[H]
+\begin{center}
+%\includegraphics[width=8cm]{grafy-zprava/testAeth.png}
+\caption{Test A}
+\label{fig:testAether}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+%\includegraphics[width=8cm]{grafy-zprava/testBeth.png}
+\caption{Test B}
+\label{fig:testBether}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+%\includegraphics[width=8cm]{grafy-zprava/testCeth.png}
+\caption{Test C}
+\label{fig:testCether}
+\end{center}
+\end{figure}
+
+\section{Grafy zrychlení}
+Grafy zobrazující závislost zrychlení výpočtu na počtu procesorů.
+\begin{figure}[H]
+\begin{center}
+%\includegraphics[width=8cm]{grafy-zprava/zrychleniinf.png}
+\label{fig:zrychleniinf}
+\caption{InfiniBand}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+%\includegraphics[width=8cm]{grafy-zprava/zrychlenieth.png}
+\label{fig:zrychlenieth}
+\caption{Ethernet}
+\end{center}
+\end{figure}
+
+\end{document}
