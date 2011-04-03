@@ -30,4 +30,4 @@
 # Do not change.
 #$ -q 12c_1slots_per_host.q
 
-./prog
+#./prog

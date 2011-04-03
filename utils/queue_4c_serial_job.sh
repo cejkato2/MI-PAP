@@ -30,4 +30,4 @@
 # Do not change.
 #$ -q 4c_serial.q
 
-./prog
+#./prog
