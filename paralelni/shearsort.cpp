@@ -5,7 +5,7 @@
 #include "../utils/2Darray.h"
 #include "../utils/array.h"
 #include "../utils/loader.h"
-#include "eot.h"
+#include "shearmergesort.h"
 
 int getRowDirection(int row)
 {
@@ -19,29 +19,60 @@ int getRowDirection(int row)
 void shearSort(Array2D& a, int rows, int cols, int numOfThreads)
 {
 	int numOfPhases = 2 * ((int)floor(log2(rows))) + 1;
+	int* auxRow;
+	int* auxCol;
 
 	#ifdef DEBUG_OUTPUT
 	std::cout << "Počet fází:" << numOfPhases << std::endl;
-//0 - je prvni liche cislo
-//1 - je prvni sude cislo
+	//0 - je prvni liche cislo
+	//1 - je prvni sude cislo
 	#endif
 	int row, col;
-	for (int phase = 0; phase < numOfPhases; phase++) {
+	int phase;
 
-		if ((phase % 2) == 0) {
-			//licha faze
+	#pragma omp parallel shared(phase,rows,cols,numOfPhases) private(auxRow,auxCol,row,col) num_threads(numOfThreads)
+	{
 
-		#pragma omp parallel for shared(phase,rows,cols) private(row) schedule(dynamic,CHUNKSIZE) num_threads(numOfThreads)
-			for (row = 0; row < rows; row++) {
-				EOTRow(a, cols, row, getRowDirection(row)); //kazdy radek v jimem smeru
+		//hlavni vlakno nastavi aktualni fazi na 0
+	#pragma omp master
+		phase = 0;
+
+		//kazdy si inicializuje svuj buffer
+		auxRow = new int[rows];
+		auxCol = new int[cols];
+
+		//pockaji na sebe
+	#pragma omp barrier
+
+		while (phase < numOfPhases) {
+
+			if ((phase % 2) == 0) {
+				//licha faze - razeni radku
+			#pragma omp for schedule(static)
+				for (row = 0; row < rows; row++) {
+					//proved MergeSort na radkovy vektor v danem smeru razeni s pritupem po radcich
+					mergeSort(a, auxRow, 0, cols - 1, row, ROW, getRowDirection(row));
+				}
+			}else{
+				//suda faze - razeni sloupcu
+			#pragma omp for schedule(static)
+				for (col = 0; col < cols; col++) {
+					//proved MergeSort na sloupcovy vektor v vzestupnem razeni s pristupem po sloupcich
+					mergeSort(a, auxCol, 0, rows - 1, col, COLUMN, ASCENDING);
+				}
 			}
-		}else{
-			//suda fazei
-		#pragma omp parallel for shared(phase,rows,cols) private(col) schedule(dynamic,CHUNKSIZE) num_threads(numOfThreads)
-			for (col = 0; col < cols; col++) {
-				EOTColumn(a, rows, col, ASCENDING); //serad vsechny sloupce smerem dolu
-			}
+
+			//master inkrementuje
+	#pragma omp master
+			phase++;
+
+	#pragma omp barrier
+
 		}
+
+		//kazde vlakno po sobe uklidi
+		delete[] auxRow;
+		delete[] auxCol;
 	}
 }
 

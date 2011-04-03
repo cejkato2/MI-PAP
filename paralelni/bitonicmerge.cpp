@@ -35,27 +35,40 @@ void BitonicMergeSort(int a[], int low, int size, int numOfThreads)
 	int stride;     //stride, kterym to budu delit (rika kolik toho budu slucovat) - zacina se na 2
 	int tmpStride;  //temporatery stride
 
+
+	//vypocteme aktualni smer zareni
+	int numOfArrows;       //pocet hlavnich "sipek" s aktualnim stridem
+
+	// zacatek privatnich promennych (pro kazde vlakno vlastni)
+	int actualArrow;                        //aktualni zvolena hlavni sipka
+	int dir;                                //aktualni smer zarezni pro hlavni sipku
+	int arrowBase;                          //zakladna aktualni volene sipky
+	int actualSubiter;                      //aktualni subiterace sipky
+	int numOfSubiters;                      //pocet subiteraci
+	int lowIndex;                           //spodni intex subiterace
+	int shift;                              //posunuti v subiteraci
+	int median;                             //median pole pro bitonicky split
+
 //dokud neslucuji stride o velikosti celeho pole -zvetsovani o dvojnasobek (shift vlevo)
-	for (stride = 2; stride <= size; stride *= 2) {
+	//for (stride = 2; stride <= size; stride *= 2) {
 
-		//stride - aktualni zpracovavane velikosti bloku, tedka zpracovavat dokud nedostaneme velikost 1 (pocet bitonickych splitu)
-		//vypocteme aktualni smer zareni
-		int numOfArrows = size / stride;        //pocet hlavnich "sipek" s aktualnim stridem
+	#pragma omp parallel shared(a,numOfArrows,stride) private(dir,tmpStride,arrowBase,actualArrow,numOfSubiters,actualSubiter,lowIndex, \
+	shift,median) num_threads(numOfThreads)
+	{
 
-		// zacatek privatnich promennych (pro kazde vlakno vlastni)
-		int actualArrow;                        //aktualni zvolena hlavni sipka
-		int dir;                                //aktualni smer zarezni pro hlavni sipku
-		int arrowBase;                          //zakladna aktualni volene sipky
-		int actualSubiter;                      //aktualni subiterace sipky
-		int numOfSubiters;                      //pocet subiteraci
-		int lowIndex;                           //spodni intex subiterace
-		int shift;                              //posunuti v subiteraci
-		int median;                             //median pole pro bitonicky split
+	#pragma omp master
+		stride = 2;
 
-		#pragma omp parallel shared(a,numOfArrows,stride) private(dir,tmpStride,arrowBase,actualArrow,numOfSubiters,actualSubiter,lowIndex, \
-		shift,median) num_threads(numOfThreads)
-		{
+	#pragma omp barrier
 
+		while (stride <= size) {
+
+		#pragma omp master
+			numOfArrows = size / stride; //pocet hlavnich "sipek" s aktualnim stridem
+
+		#pragma omp barrier
+
+			//stride - aktualni zpracovavane velikosti bloku, tedka zpracovavat dokud nedostaneme velikost 1 (pocet bitonickych splitu)
 		#pragma omp for schedule(static)
 			for (actualArrow = 0; actualArrow < numOfArrows; actualArrow++) {
 				//tedka mam vybranou hlavni sipku, urcim jeji smer razeni
@@ -70,6 +83,7 @@ void BitonicMergeSort(int a[], int low, int size, int numOfThreads)
 				arrowBase = actualArrow * stride;       //zacatek velke sipky
 
 				//v kazde iteraci se musi upravit velikost stridu
+
 				for (; tmpStride > 1; tmpStride /= 2) {
 					numOfSubiters = stride / tmpStride;                             //pocet subiteraci v aktualnim zmensenem stridu
 					for (actualSubiter = 0; actualSubiter < numOfSubiters; actualSubiter++) {
@@ -83,6 +97,10 @@ void BitonicMergeSort(int a[], int low, int size, int numOfThreads)
 				}
 
 			}
+
+			#pragma omp master
+			stride *= 2;
+
 		}
 	}
 }

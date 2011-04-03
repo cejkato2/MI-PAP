@@ -1,8 +1,8 @@
-#include <stdio.h>
-#include <math.h>
-#include <omp.h>
-#include "../utils/2Darray.h"
-#include "eot.h"
+	#include <stdio.h>
+	#include <math.h>
+	#include <omp.h>
+	#include "../utils/2Darray.h"
+	#include "eot.h"
 
 void swap(Array2D& a, int i1, int j1, int i2, int j2)
 {
