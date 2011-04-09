@@ -43,13 +43,14 @@ void testSortedArray(Array& a, int numOfThreads)
 
 void testSortedArraysekv(Array& a)
 {
-  int *t = a.getData();
-  int i;
-  for (i=1; i<a.getSize(); ++i) {
-    if (t[i] < t[i-1]) {
-      std::cout << "Pole neni serazene(sekv)" << std::endl;
-      break;
-    }
-  }
+	int *t = a.getData();
+	int i;
+
+	for (i = 1; i < a.getSize(); ++i) {
+		if (t[i] < t[i - 1]) {
+			std::cout << "Pole neni serazene(sekv)" << std::endl;
+			break;
+		}
+	}
 }
 
