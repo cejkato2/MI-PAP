@@ -5,20 +5,24 @@ CC=nvcc
 EXECUTABLE=sort
 
 # Cuda source files (compiled with cudacc)
-CUFILES= \
-        eot.cu \
+CUFILES=\
+        main.cu \
 
 # CUDA dependency files
 
 # C/C++ source files (compiled with gcc / c++)
-CCFILES	= \
-	main.cpp \
+CCFILES	=\
 
 default: build
 
+run: clean build
+	echo "Starting up the program."
+	./$(EXECUTABLE)
 
 build:	$(CCFILES) $(CUFILES)
+	echo "Building CUDA"
 	$(CC) -g -G $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
 
 clean:
-	rm -f $(EXECUTABLE)
+	echo "Cleaning directories."
+	rm -f $(EXECUTABLE) *.out
