@@ -8,7 +8,7 @@
 \usepackage[T1]{fontenc} 
 \usepackage{verbatim}
 \usepackage{graphicx}
-\usepackage{hyperref}
+%\usepackage{hyperref}
 \usepackage{lmodern}
 \usepackage{float}
 
@@ -31,6 +31,7 @@ magisterské studijum, FIT ČVUT, Kolejní 550/2, 160 00 Praha 6\\[2mm]
 \end{center}
 
 \section{Definice problému a popis sekvenčního algoritmu}
+\subsection{Zadání}
 Podle zadání semestrální práce je úkolem implementace aspoň tří z následujících
 řadících algoritmů: Shearsort, 3D sort, Sudo-lichý Mergesort a Bitonic sort.
 
@@ -42,7 +43,30 @@ Pro účely měření času běhu výsledných programů a porovnání paraleln�
 
 Semestrální práce spočívala v implementaci vybraných řadících algoritmů jako sekvenční řešení, paralelní
 řešení na počítači se sdílenou pamětí s použítím knihovny OpenMP a následně s využitím technologie CUDA
-společnosti NVIDIA$^{\tiny{\textregistered}}$.
+společnosti NVIDIA\textsuperscript{\tiny{\textregistered}}.
+
+\subsection{Řešení}
+Vytvořili jsme si základní moduly \textbf{Loader} a \textbf{Array} (případně ještě pro Shearsort 
+\textbf{Array2D}), které sdílíme mezi jednotlivými implementacemi algoritmů.
+
+Modul Array se stará o uchování načtených dat a při načtení se stará o zvětšování alokované paměti 
+v případě potřeby. Modifikace Array2D umožňuje mapování jednorozměrného pole na dvourozměrné.
+
+Loader čte předané parametry programu a nastavuje na jejich základě počet prvků k seřazení a počet
+spouštěných vláken. Loader dokáže vygenerovat pseudonáhodnou posloupnost prvků nebo načíst data ze zadaného
+souboru.
+
+Přikompilování těchto modulů nám vytváří stejné rozhraní u všech programů.
+
+Implementací paralelních algoritmů Bitonicsort a Even-Odd mergesort vznikly i prototypy sekvenční.
+Tyto programy jsme rovněž zařadili do měření.
+
+Měření jsme prováděli plně automatizovaně - v adresáři /utils jsme pro ten účel vytvořili skripty,
+které nám vytvoří strukturu adresářů /tests, do které podle počtu vlánek a objemu dat vygeneruje
+skripty pro zadání úlohy do fronty.
+
+Nad touto strukturou adresářů je možné jednoduše provádět zařazení úloh do fronty i vybrání naměřených
+výsledků.
 
 \section{Popis paralelního algoritmu a jeho implementace v OpenMP}
 \subsection{Sudo-lichý mergesort}
@@ -60,108 +84,205 @@ Snažili jsme se o co nejrovnoměrnější rozdělení dat mezi vlákna, takže 
 programu na stejné části, jejichž počet je rovný nějaké mocnině dvou a jednotlivá vlákna seřadí tuto podposloupnost
 dat. Tento přístup je možný díky rekurzivní povaze algoritmu a řadících sítí.
 Po seřazení podposloupností je potřeba ještě provést jejich sloučení. Sloučení se provádí v logaritmickém čase,
-protože .....
+protože díky půlení posloupnosti se slučuje vždy \(log n\) podposloupností.
+
 \subsection{Bitonic sort}
+Bitonic sort vytváří v posloupnosti dat dvě podposloupnosti, kde jedna je nerostoucí a druhá neklesající.
+V druhé fázi se dílčí podposloupnosti slévají až jsou nakonec data seřazená.
+
+Rozdělování podposloupností probíhá na disjuktních částech posloupnosti, což umožňuje paralelizaci.
+Ve smyčce, kterou procházíme pole dat se zvětšuje proměnná, určující rozestup mezi prvky.
 
 \subsection{Shearsort}
+Posledním implementovaným řadícím algoritmem je Shearsort. Algoritmus jsme realizovali 
+s použitím sekvenčního algoritmu mergesort, který voláme na seřazení jednotlivých řádků a sloupců
+mřízky, do které jsou data virtuálně rozdělena. Virtuálně proto, že používáme pro uložení dat jednorozměrné
+pole a mapovací funkci, která umožňuje adresovat prvek matice souřadnicemi \emph{x} a \emph{y}.
+
+Jednotlivé fáze algoritmu (sloupcové a řádkové) je nutné provést sekvenčně za sebou,
+ale řazení řádků i sloupců v jedné fázy je možné spouštět najednou paralelně.
 
 \section{Naměřené výsledky a vyhodnocení}
 \subsection{Způsob měření}
 
 \subsection{Naměřené časy}
+Měření probíhalo za pomoci knihovní funkce \textbf{omp\_get\_wtime()}, která vrací čas běhu programu.
+Uložením času na začátku výpočtu a jeho odečtením od času na konci výpočtu dostaneme dobu, kterou
+algoritmus potřebuje na seřazení vstupních dat.
 
+Vlastní zařazení našich programů do fronty na serveru \textbf{star} je popsané v sekci 1.2.
+
+\subsubsection{Sekvenční Mergesort}
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|r|r|r|r|}
-\hline
-Počet CPU & A & B & C\\
-\hline
-1 & 321,8 & 307,3 & 338,6\\
-\hline
-2 & 38,95370 & 35,46150 & 40,27100\\
-\hline
-4 & 12,20080 & 12,45520 & 21,30230\\
-\hline
-8 & 7,14178 & 10,43290 & 15,05280\\
-\hline
-16 & 6,55517 & 8,99971 & 11,43290\\
-\hline
-24 & 6,21340 & 7,14230 & 8,85400\\
-\hline
-32 & 6,24150 & 7,13790 & 8,42100\\
-\hline
+\hline Množství dat (2^n) & Počet vláken & Čas \\ \hline
+10 & 1 &  0,000236067 \\ \hline
+10 & 1 &  0,000236629 \\ \hline
+10 & 1 &  0,000001956 \\ \hline
+16 & 1 &  0,022770800 \\ \hline
+16 & 1 &  0,022806500 \\ \hline
+20 & 1 &  0,449648000 \\ \hline
+20 & 1 &  0,450177000 \\ \hline
+24 & 1 &  8,545500000 \\ \hline
+24 & 1 &  8,547720000 \\ \hline
+26 & 1 &  37,555900000 \\ \hline
+26 & 1 &  37,559000000 \\ \hline
 \end{tabular} 
 \end{center}
-\caption{Propojovací síť InfiniBand}
+\caption{Mergesort}
 \end{table}
 
-\subsection{Spočítané zrychlení}
+
+\subsubsection{Sekvenční Bitonic sort}
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|r|r|r|r|}
-\hline
-Počet CPU & A & B & C\\
-\hline
-1 & 1 & 1 & 1\\
-\hline
-2 & 8,15 & 8,78 & 8,99\\
-\hline
-4 & 24,40 & 24,84 & 16,55\\
-\hline
-8 & 41,18 & 29,26 & 23,92\\
-\hline
-16 & 42,81 & 35,45 & 31,66\\
-\hline
-24 & 45,03 & 42,86 & 37,77\\
-\hline
-32 & 46,48 & 42,32 & 38,55\\
-\hline
-\end{tabular}
-\end{center}
-\caption{Zrychlení Propojovací síť Ethernet}
-\end{table}
-
-\begin{table}[H]
-\begin{center}
-\begin{tabular}{|r|r|r|r|}
-\hline
-Počet CPU & A & B & C\\
-\hline
-1 & 1 & 1 & 1\\
-\hline
-2 & 8,26 & 9,00 & 8,99\\
-\hline
-4 & 26,38 & 25,61 & 16,99\\
-\hline
-8 & 45,06 & 30,58 & 24,05\\
-\hline
-16 & 49,09 & 35,45 & 31,66\\
-\hline
-24 & 51,79 & 44,66 & 40,89\\
-\hline
-32 & 51,56 & 44,69 & 42,99\\
-\hline
+\hline Množství dat (2^n) & Počet vláken & Čas \\ \hline
+10  & 1 & 0,004925620 \\ \hline
+10  & 1 & 0,004965150 \\ \hline
+10  & 1 & 0,000002794 \\ \hline
+16  & 1 & 0,525927000 \\ \hline
+16  & 1 & 0,534220000 \\ \hline
+20  & 1 & 10,747800000 \\ \hline
+20  & 1 & 10,882500000 \\ \hline
+24  & 1 & 214,370000000 \\ \hline
+24  & 1 & 230,594000000 \\ \hline
+26  & 1 & 940,951000000 \\ \hline
+26  & 1 & 969,520000000 \\ \hline
 \end{tabular} 
 \end{center}
-\caption{Zrychlení Propojovací síť InfiniBand}
+\caption{Bitonic sort}
 \end{table}
-Zrychlení nám vyšlo superlineární pro všechna měření paralelní úlohy, 
-protože platí $$S > p$$, kde \(S\) je zrychlení a \(p\) je počet procesorů. Důvodem takového zrychlení je vhodné rozesílání
-nejlepších dosažených výsledků a tím i četné ořezávání stavového prostoru.
+
+
+\subsubsection{Bitonic sort}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|r|}
+\hline Množství dat (2^n) & Počet vláken & Čas \\ \hline
+10 & 2  & 0,000049379 \\ \hline
+10 & 4  & 0,000057481 \\ \hline
+10 & 8  & 0,000048540 \\ \hline
+10 & 16 & 0,000058248 \\ \hline
+10 & 32 & 0,000048400 \\ \hline
+16 & 2  & 0,009313320 \\ \hline
+16 & 4  & 0,015767700 \\ \hline
+16 & 8  & 0,539144000 \\ \hline
+16 & 16 & 0,006299840 \\ \hline
+16 & 32 & 0,007108750 \\ \hline
+20 & 2  & 0,199643000 \\ \hline
+20 & 4  & 0,122328000 \\ \hline
+20 & 8  & 0,288970000 \\ \hline
+20 & 16 & 0,100444000 \\ \hline
+20 & 32 & 0,096497300 \\ \hline
+24 & 2  & 4,928480000 \\ \hline
+24 & 4  & 3,395880000 \\ \hline
+24 & 8  & 2,753720000 \\ \hline
+24 & 16 & 2,713770000 \\ \hline
+24 & 32 & 2,861780000 \\ \hline
+26 & 2  & 24,432600000 \\ \hline
+26 & 4  & 16,383700000 \\ \hline
+26 & 8  & 13,385400000 \\ \hline
+26 & 16 & 13,238900000 \\ \hline
+26 & 32 & 15,845600000 \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Bitonic sort}
+\end{table}
+
+\subsubsection{Shearsort}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|r|}
+\hline Množství dat (2^n) & Počet vláken & Čas \\ \hline
+10 &  2  & 0,009902510 \\ \hline
+10 &  4  & 0,003633750 \\ \hline
+10 &  8  & 0,052614600 \\ \hline
+10 &  16 & 0,002243120 \\ \hline
+10 &  32 & 0,002845790 \\ \hline
+16 &  2  & 0,376618000 \\ \hline
+16 &  4  & 0,204998000 \\ \hline
+16 &  8  & 0,251678000 \\ \hline
+16 &  16 & 0,118000000 \\ \hline
+16 &  32 & 0,130110000 \\ \hline
+20 &  2  & 9,355110000 \\ \hline
+20 &  4  & 4,719530000 \\ \hline
+20 &  8  & 2,452050000 \\ \hline
+20 &  16 & 2,305150000 \\ \hline
+20 &  32 & 2,391850000 \\ \hline
+24 &  2  & 218,866000000 \\ \hline
+24 &  4  & 109,682000000 \\ \hline
+24 &  8  & 55,209200000 \\ \hline
+24 &  16 & 42,124100000 \\ \hline
+24 &  32 & 39,520600000 \\ \hline
+26 &  2  & 1097,600000000 \\ \hline
+26 &  4  & 550,067000000 \\ \hline
+26 &  8  & 275,809000000 \\ \hline
+26 &  16 & 196,865000000 \\ \hline
+26 &  32 & 189,860000000 \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Shearsort}
+\end{table}
+
+
+\subsubsection{Even-Odd Mergesort}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|r|}
+\hline Množství dat (2^n) & Počet vláken & Čas \\ \hline
+10 & 1  & 0,000634586 \\ \hline
+10 & 2  & 0,000403688 \\ \hline
+10 & 4  & 0,000482750 \\ \hline
+10 & 8  & 0,006025150 \\ \hline
+10 & 16 & 0,000825326 \\ \hline
+10 & 32 & 0,001204360 \\ \hline
+16 & 1  & 0,098675900 \\ \hline
+16 & 2  & 0,051694300 \\ \hline
+16 & 4  & 0,052649500 \\ \hline
+16 & 8  & 0,096545900 \\ \hline
+16 & 16 & 0,063254200 \\ \hline
+16 & 32 & 0,071388800 \\ \hline
+20 & 1  & 3,569340000 \\ \hline
+20 & 2  & 1,564750000 \\ \hline
+20 & 4  & 1,431630000 \\ \hline
+20 & 8  & 1,651200000 \\ \hline
+20 & 16 & 1,848680000 \\ \hline
+20 & 32 & 2,089870000 \\ \hline
+24 & 1  & 118,748000000 \\ \hline
+24 & 2  & 59,361000000 \\ \hline
+24 & 4  & 56,932900000 \\ \hline
+24 & 8  & 66,153200000 \\ \hline
+24 & 16 & 78,251600000 \\ \hline
+24 & 32 & 86,036700000 \\ \hline
+26 & 1  & 709,920000000 \\ \hline
+26 & 2  & 335,756000000 \\ \hline
+26 & 4  & 312,814000000 \\ \hline
+26 & 8  & 352,921000000 \\ \hline
+26 & 16 & 414,455000000 \\ \hline
+26 & 32 & 480,307000000 \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Even-Odd Mergesort}
+\end{table}
+
+
 
 \subsection{Vyhodnocení}
 
 \section{Závěr}
 
 \section{Literatura}
-\begin{enumerate}
-\item \href{https://edux.fit.cvut.cz/courses/MI-PAR/labs/prohledavani_do_hloubky}{Stránky cvičení - prohledávání do hloubky}
-\item \href{https://edux.fit.cvut.cz/courses/MI-PAR/labs/poznamky_k_implementaci}{Stránky cvičení - poznámky k implementaci}
-\end{enumerate}
+%\begin{enumerate}
+%\item \href{https://edux.fit.cvut.cz/courses/MI-PAR/labs/prohledavani_do_hloubky}{Stránky cvičení - prohledávání do hloubky}
+%\item \href{https://edux.fit.cvut.cz/courses/MI-PAR/labs/poznamky_k_implementaci}{Stránky cvičení - poznámky k implementaci}
+%\end{enumerate}
 
 
 \appendix
 \section{Grafy závislosti času na počtu vláken}
+\begin{comment}
 \subsection{Propojovací síť InfiniBand}
 Grafy závislosti času na počtu procesorů při použití propojovací sítě InfiniBand.
 \begin{figure}[H]
@@ -231,5 +352,6 @@ Grafy zobrazující závislost zrychlení výpočtu na počtu procesorů.
 \caption{Ethernet}
 \end{center}
 \end{figure}
+\end{comment}
 
 \end{document}
