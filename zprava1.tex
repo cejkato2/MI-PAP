@@ -8,11 +8,11 @@
 \usepackage[T1]{fontenc} 
 \usepackage{verbatim}
 \usepackage{graphicx}
-%\usepackage{hyperref}
+\usepackage{hyperref}
 \usepackage{lmodern}
 \usepackage{float}
 
-
+\makeindex
 
 \begin{document}
 %\oddsidemargin=-5mm \evensidemargin=-5mm \marginparwidth=.08in
@@ -29,7 +29,11 @@
 magisterské studijum, FIT ČVUT, Kolejní 550/2, 160 00 Praha 6\\[2mm]
 \today
 \end{center}
+\newpage
 
+\tableofcontents
+\listoftables
+\newpage
 \section{Definice problému a popis sekvenčního algoritmu}
 \subsection{Zadání}
 Podle zadání semestrální práce je úkolem implementace aspoň tří z následujících
@@ -131,6 +135,29 @@ Vlastní zařazení našich programů do fronty na serveru \textbf{star} je pops
 \end{tabular} 
 \end{center}
 \caption{Mergesort}
+\end{table}
+
+\subsubsection{Sekvenční Even-Odd Mergesort}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|r|}
+\hline Množství dat (2\textsuperscript{n}) & Počet vláken & Čas \\ \hline
+10  & 1 & 0,000634586  \\ \hline
+10  & 1 & 0,000634735  \\ \hline
+10  & 1 & 0,000635005  \\ \hline
+10  & 1 & 0,000001676  \\ \hline
+16  & 1 & 0,098675900  \\ \hline
+16  & 1 & 0,099481000  \\ \hline
+16  & 1 & 0,100037000  \\ \hline
+20  & 1 & 3,569340000  \\ \hline
+24  & 1 & 118,748000000  \\ \hline
+24  & 1 & 120,404000000  \\ \hline
+24  & 1 & 130,860000000  \\ \hline
+26  & 1 & 709,920000000  \\ \hline
+26  & 1 & 735,275000000  \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Even-Odd Mergesort}
 \end{table}
 
 
@@ -306,11 +333,11 @@ Zrychlení je počítáno jako $$S = {{sekvencni\_cas}\over{paralelni\_cas}}$$
 \caption{Zrychlení algoritmu Bitonic sort}
 \end{table}
 
-\subsubsection{Shearsort\footnote{Jako sekvenční algoritmus byl zvolen Mergesort}}
+\subsubsection{Shearsort}
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|r|r|}
-\hline Vlákna & Zrychlení \\ \hline
+\hline Vlákna & Zrychlení\footnotemark[1] \\ \hline
 1  & 1  \\ \hline
 2  & 0,03  \\ \hline
 4  & 0,07  \\ \hline
@@ -321,18 +348,31 @@ Zrychlení je počítáno jako $$S = {{sekvencni\_cas}\over{paralelni\_cas}}$$
 \end{center}
 \caption{Zrychlení algoritmu Shearsort}
 \end{table}
-
-
+\footnotetext[1]{Jako sekvenční algoritmus byl zvolen Mergesort}
 
 \subsection{Vyhodnocení}
+Nejlepšího zrychlení jsme dosáhli u algoritmu Bitonic sort, který jsme porovnávali s jeho sekvenční variantou.
+Pokud bychom porovnávali sekvenční řešení problému, jednoznačně nejlepší implementací řadícího algoritmu je
+sekvenční Mergesort s časem\footnote[2]{Uvádíme vždy nejlepší naměřené časy} 37,559s 
+na 2\textsuperscript{26} čísel. Následuje daleko za ním algoritmus Even-Odd Mergesort
+s časem 709,92s a na posledním míste je Bitonic sort s časem 940,95s.
+
+Z těchto časů plyne i vypočtené zrychlení, které sice pro Shearsort vychází velmi špatně, ale na druhou stranu
+Shearsort stále zlepšuje svůj čas se vzrůstajícím počtem vláken.
 
 \section{Závěr}
+Seznámili jsme se s vývojem paralelních aplikací na víceprocesorovém stroji se sdílenou pamětí
+s využitím implementace technologie OpenMP, konkrétně pro GCC knihovna GOMP.
 
+Zjistili jsme, že vývoj za pomoci OpenMP je paralelizace algoritmu mnohem jednodušší než při použití
+systémových volání pro vytváření a synchronizaci vláken. OpenMP nám umožnilo zparalelizovat
+smyčky minimální modifikací funkčního zdrojového kódu, což značně urychlilo implementaci
+řešení.
 \section{Literatura}
-%\begin{enumerate}
-%\item \href{https://edux.fit.cvut.cz/courses/MI-PAR/labs/prohledavani_do_hloubky}{Stránky cvičení - prohledávání do hloubky}
-%\item \href{https://edux.fit.cvut.cz/courses/MI-PAR/labs/poznamky_k_implementaci}{Stránky cvičení - poznámky k implementaci}
-%\end{enumerate}
+\begin{enumerate}
+\item \href{https://edux.fit.cvut.cz/courses/MI-PAR/labs/prohledavani_do_hloubky}{Stránky cvičení - prohledávání do hloubky}
+\item \href{https://edux.fit.cvut.cz/courses/MI-PAR/labs/poznamky_k_implementaci}{Stránky cvičení - poznámky k implementaci}
+\end{enumerate}
 
 
 \appendix
