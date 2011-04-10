@@ -116,7 +116,7 @@ Vlastní zařazení našich programů do fronty na serveru \textbf{star} je pops
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|r|r|r|r|}
-\hline Množství dat (2^n) & Počet vláken & Čas \\ \hline
+\hline Množství dat (2\textsuperscript{n}) & Počet vláken & Čas \\ \hline
 10 & 1 &  0,000236067 \\ \hline
 10 & 1 &  0,000236629 \\ \hline
 10 & 1 &  0,000001956 \\ \hline
@@ -138,7 +138,7 @@ Vlastní zařazení našich programů do fronty na serveru \textbf{star} je pops
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|r|r|r|r|}
-\hline Množství dat (2^n) & Počet vláken & Čas \\ \hline
+\hline Množství dat (2\textsuperscript{n}) & Počet vláken & Čas \\ \hline
 10  & 1 & 0,004925620 \\ \hline
 10  & 1 & 0,004965150 \\ \hline
 10  & 1 & 0,000002794 \\ \hline
@@ -160,7 +160,7 @@ Vlastní zařazení našich programů do fronty na serveru \textbf{star} je pops
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|r|r|r|r|}
-\hline Množství dat (2^n) & Počet vláken & Čas \\ \hline
+\hline Množství dat (2\textsuperscript{n}) & Počet vláken & Čas \\ \hline
 10 & 2  & 0,000049379 \\ \hline
 10 & 4  & 0,000057481 \\ \hline
 10 & 8  & 0,000048540 \\ \hline
@@ -195,7 +195,7 @@ Vlastní zařazení našich programů do fronty na serveru \textbf{star} je pops
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|r|r|r|r|}
-\hline Množství dat (2^n) & Počet vláken & Čas \\ \hline
+\hline Množství dat (2\textsuperscript{n}) & Počet vláken & Čas \\ \hline
 10 &  2  & 0,009902510 \\ \hline
 10 &  4  & 0,003633750 \\ \hline
 10 &  8  & 0,052614600 \\ \hline
@@ -231,7 +231,7 @@ Vlastní zařazení našich programů do fronty na serveru \textbf{star} je pops
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|r|r|r|r|}
-\hline Množství dat (2^n) & Počet vláken & Čas \\ \hline
+\hline Množství dat (2\textsuperscript{n}) & Počet vláken & Čas \\ \hline
 10 & 1  & 0,000634586 \\ \hline
 10 & 2  & 0,000403688 \\ \hline
 10 & 4  & 0,000482750 \\ \hline
@@ -265,6 +265,61 @@ Vlastní zařazení našich programů do fronty na serveru \textbf{star} je pops
 \end{tabular} 
 \end{center}
 \caption{Even-Odd Mergesort}
+\end{table}
+
+\subsection{Zrychlení}
+U algoritmů Bitonic sort a Even-Odd Mergesort jsme vztahovali zrychlení k sekvenčnímu použití téhož algoritmu.
+Shearsort jsme porovnávali se sekvenčním algoritmem Mergesort. Pro výpočet zrychlení jsme uvažovali jen
+nejvyšší \emph{N}, tedy množství dat, což je v našem případě \(2^{26}\).
+
+Zrychlení je počítáno jako $$S = {{sekvencni\_cas}\over{paralelni\_cas}}$$
+
+\subsubsection{Bitonic sort}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|}
+\hline Vlákna & Zrychlení \\ \hline
+1	& 1 \\ \hline
+2	& 39,68 \\ \hline
+4	& 59,18 \\ \hline
+8	& 72,43 \\ \hline
+16	& 73,23 \\ \hline
+32	& 61,19 \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Zrychlení algoritmu Bitonic sort}
+\end{table}
+
+\subsubsection{Even-Odd Mergesort}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|}
+\hline Vlákna & Zrychlení \\ \hline
+1  & 1      \\ \hline
+2  & 2,89   \\ \hline
+4  & 3,1    \\ \hline
+8  & 2,75   \\ \hline
+16 & 2,34   \\ \hline
+32 & 2,02   \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Zrychlení algoritmu Bitonic sort}
+\end{table}
+
+\subsubsection{Shearsort\footnote{Jako sekvenční algoritmus byl zvolen Mergesort}}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|}
+\hline Vlákna & Zrychlení \\ \hline
+1  & 1  \\ \hline
+2  & 0,03  \\ \hline
+4  & 0,07  \\ \hline
+8  & 0,14  \\ \hline
+16 & 0,19  \\ \hline
+32 & 0,2  \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Zrychlení algoritmu Shearsort}
 \end{table}
 
 
