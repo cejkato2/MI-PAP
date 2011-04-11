@@ -5,10 +5,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ARRAY_SIZE 8
+#define ARRAY_SIZE 1024
 #define MODULE 100
 
 #define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
+
+void generateArray(int a[],int size)
+{
+	srand(time(NULL));
+	for(int i=0;i<size;i++){
+	  a[i]=(rand() % MODULE);
+	}
+}
+
+
+void printArray(int a[],int size)
+{
+	for(int i=0;i<size;i++){
+		printf("%d ",a[i]);
+	}
+	printf("\n");
+}
 
 /*
 *Error handlign function
@@ -38,13 +55,21 @@ __device__ void cas(int *f, int *t, int i, int j, int n, int me)
 // does one iteration of the sort
 __global__ void oekern(int *da, int *daaux, int n, int iter)
 {
-	int bix = blockIdx.x; // block number within grid
-	if (iter % 2) {
-		if (bix % 2) cas(da, daaux, bix - 1, bix, n, bix);
-		else cas(da, daaux, bix, bix + 1, n, bix);
-	} else {
-		if (bix % 2) cas(da, daaux, bix, bix + 1, n, bix);
-		else cas(da, daaux, bix - 1, bix, n, bix);
+int bix=blockIdx.x;
+	if( (iter%2) == 1){
+	//provadej LS vymenu
+	if( (bix%2) == 0){
+		cas(da,daaux,bix,bix+1,n,bix);
+		}else{
+		cas(da,daaux,bix-1,bix,n,bix);
+		}
+	}else{
+	//provadej SL vymenu
+	if( (bix%2) == 1){
+		cas(da,daaux,bix,bix+1,n,bix);
+		}else{
+		cas(da,daaux,bix-1,bix,n,bix);
+		}
 	}
 }
 
@@ -66,10 +91,10 @@ void oddeven(int *ha, int n)
 		oekern <<< dimGrid, dimBlock >>> (da, daaux, n, iter);
 		cudaThreadSynchronize();
 		if (iter < n) {	
-		// swap pointers
-			tmp = da;
-			da = daaux;
-			daaux = tmp;
+			//tmp = da;
+			//da = daaux;
+			//daaux = tmp;
+		cudaMemcpy(da,daaux,dasize,cudaMemcpyDeviceToDevice);
 		} else{
 			cudaMemcpy(ha, daaux, dasize, cudaMemcpyDeviceToHost); //copy results
 		}
@@ -80,35 +105,16 @@ void oddeven(int *ha, int n)
 }
 
 
-void generateArray(int a[],int size)
-{
-	for(int i=0;i<size;i++){
-	  a[i]=(rand() % MODULE);
-	}
-}
-
-
-void printArray(int a[],int size)
-{
-	for(int i=0;i<size;i++){
-		printf("%d ",a[i]);
-	}
-	printf("\n");
-}
 
 int main(int argc, char** argv)
 {
-cudaDeviceProp prop; //vlastnosti gpu
-int whichDev; //device
-
 int* a = new int[ARRAY_SIZE];
 
 generateArray(a, ARRAY_SIZE);
 printArray(a,ARRAY_SIZE);
 
-//HANDLE_ERROR(cudaGetDevice(&whichDev));
-//HANDLE_ERROR(cudaGetDeviceProperties(&prop,whichDev));
+oddeven(a,ARRAY_SIZE);
 
-//printf("MultiProcCount->%d\n",prop.multiProcessorCount);
+printArray(a,ARRAY_SIZE);
 return 0;
 }
