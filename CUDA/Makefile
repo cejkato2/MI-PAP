@@ -6,7 +6,7 @@ EXECUTABLE=sort
 
 # Cuda source files (compiled with cudacc)
 CUFILES= \
-	main.cu \
+	*.cu
 
 # CUDA dependency files
 
@@ -15,7 +15,6 @@ CCFILES	= \
 	
 
 default: build
-
 
 build:	$(CCFILES) $(CUFILES)
 	$(CC) -g -G $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
