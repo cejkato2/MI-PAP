@@ -197,7 +197,7 @@ int main(int argc, char** argv)
 
 	std::cout << "Elapsed time: " << omp_get_wtime() - timer << "s" << std::endl;
 	//a.print();
-	testSortedArray(a, 2);
+	testSortedArraysekv(a);
 
 	//a.print();
 
