@@ -1,11 +1,12 @@
 #code compiler
 CC=nvcc
+DBG=cuda-gdb
 
 # Add source files here
 EXECUTABLE=sort
 
 # Cuda source files (compiled with cudacc)
-CUFILES= \
+CUFILES=\
 	*.cu
 
 # CUDA dependency files
@@ -13,6 +14,11 @@ CUFILES= \
 # C/C++ source files (compiled with gcc / c++)
 CCFILES	= \
 	
+run: build 
+	./$(EXECUTABLE)
+
+dbg: build
+	$(DBG) ./$(EXECUTABLE)
 
 default: build
 
