@@ -14,16 +14,17 @@ CUFILES=\
 # C/C++ source files (compiled with gcc / c++)
 CCFILES	= \
 	
+
+default: build
+
 run: build 
 	./$(EXECUTABLE)
 
 dbg: build
 	$(DBG) ./$(EXECUTABLE)
 
-default: build
-
 build:	$(CCFILES) $(CUFILES)
-	$(CC) -g -G $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
+	$(CC) -g -G -O3 $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
 
 clean:
 	rm -f $(EXECUTABLE)
