@@ -28,18 +28,23 @@ __device__ void cas(int *local_f, int *local_t, int* global_h, int i, int j, int
 	if(my_global_pos == 0 && i < 0){return ;} //kontrola leve zarazky
 	if(my_global_pos == (n-1) && j>=n){return ;} //kontrola prave zarazky
 //2) Jsme v ramci globalniho pole N, muzem zacit provadet vymeny - jsme v ramci bloku mimo krajni prvky? -> pokud ano, trid ve sdilene pameti
-	if( ((i>0 && i< (NUM_OF_THREADS-1)) && (phase == LS)) //pokud nejsi mimo v LS fazi, tak trid v ramci lokalniho pole
-	    ((i==(NUM_OF_THREADS-1)
+	if( ((i>0 && i<(NUM_OF_THREADS-1)) && (phase == LS)) //pokud nejsi mimo v LS fazi, tak trid v ramci lokalniho pole
 		   || phase == SL){ //pokud mas SL fazi, tak je vse OK a muzes vse tridit v ramci lokalniho pole
 		if (me == i) { //v teto casti jsme v ramci indexu sdileneho pole 
 			if (local_f[i] > local_f[j]) local_t[me] = local_f[j];
-			//else local_t[me] = local_f[i];
+			else local_t[me] = local_f[i];
 		} else { // me == j
 			if (local_f[i] > local_f[j]) local_t[me] = local_f[i];
-			//else local_t[me] = local_f[j];
+			else local_t[me] = local_f[j];
 		}			
 	}else{ //jinak musis komunikovat do globalni pameti, protoze jsi vlakno s krajnim indexem a 
-	
+		if(me == (NUM_OF_THREADS - 1)){ //pokud je me cislo rovno  krajnimu cislu vlakna (tj NUM_OF_THREADS -1) -> jsem i 
+			if(local_f[i] > global_h[my_global_pos+1]) local_t[me] = global_h[my_global_pos+1]; //pokud jsem vetsi jak muj glob. soused, tak si upravim v lokalni pameti data
+			else local_t[me] = local_f[i]; //jinak jsem na to spravne a prekopiruju si to do tmp pole
+		}else{//jsem j
+			if(global_h[my_global_pos-1] > local_f[j]) local_t[me] = global_h[my_global_pos-1]; //pokud je muj globalni soused vetsi jak ja, tak si uravim v lokalni pameti
+			else local_t[me] = local_f[j]; //jinak jsem na tom dobre a nic menit nemusim
+		}	
 	}
 }
 
@@ -66,7 +71,11 @@ __global__ void oekern(int *h_da, int n,volatile unsigned int* barnos)
 //3) N-krat budeme opakovat transpozice nad svou casti dat
 //Pozn. : SL liche jsou v ramci sdilene pameti. U LS musi krajni vlakna komunikovat prez globalni pamet.
 	unsigned int iter;
+	unsigned int phase;
 	for(iter=0; iter < n; iter++){ 
+
+	//urci fazi
+	if()
 
 		if( (iter%2) == 1){
 		//provadej LS vymenu
@@ -83,7 +92,19 @@ __global__ void oekern(int *h_da, int n,volatile unsigned int* barnos)
 				cas(sData, sData_aux, h_da, tix-1, tix, n, d_index, tix, iter);
 			}
 		}
+//4) Dokoncili jsme jednu vymenu, pockame na vsechny bloky a krajni vlakna osvezi data na svojich pozicich v globalni pameti
+	__syncblocks(barnos); //pockame az vsichni dodelaji krok
+	
+	//pouze krajni reprezentanti udelaji atualizace v globalni pameti
+	if(tix==0 || tix==(NUM_OF_THREADS-1)){
+		h_da[d_index] = sData_aux[tix]; 
 	}
+
+	sData_aux[tix]=sData[tix]; //kazde vlakno si navic osvezi sva data z temp pole
+	__syncblocks(barnos); //a pokracovat budeme, az toto dokoci vsechny vlakna ve vsech blocich	
+	}
+//5) Ukonceno N iteraci ---> nakopirujeme data do globalni pameti
+	h_da[d_index] = sData_aux[tix]; 
 }
 
 

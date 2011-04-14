@@ -5,7 +5,7 @@
 
 /*http://aggregate.org/MAGIC/#GPU SyncBlocks*/
 
-inline __device__ void __syncblocks(volatile unsigned int *barnos) 
+__device__ void __syncblocks(volatile unsigned int *barnos) 
 { 
 
 /* First, sync within each Block */
