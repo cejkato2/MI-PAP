@@ -127,10 +127,28 @@ void oddeven(int *ha, int n)
 	int *da;
 	int dasize = n * sizeof(int);
 
+	//choose best device
+	int num_devices, device;
+	cudaGetDeviceCount(&num_devices);
+	if (num_devices > 1) {
+      	int max_multiprocessors = 0, max_device = 0;
+      		for (device = 0; device < num_devices; device++) {
+              		cudaDeviceProp properties;
+              		cudaGetDeviceProperties(&properties, device);
+              		
+			if (max_multiprocessors < properties.multiProcessorCount) {
+                      		max_multiprocessors = properties.multiProcessorCount;
+                	     	max_device = device;
+        	      	}
+      		}
+	
+      		cudaSetDevice(max_device);
+	}
+
 	HANDLE_ERROR(cudaMalloc((void **)&da, dasize));
 	HANDLE_ERROR(cudaMemcpy(da, ha, dasize, cudaMemcpyHostToDevice));
 	// the array daaux will serve as "scratch space"
-	
+		
 	int numOfBlocks = (int) ceil(ARRAY_SIZE/NUM_OF_THREADS); //number of blocks
 	
 	// ===== alokuj pole pro synchro =====
