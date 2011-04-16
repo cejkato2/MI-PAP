@@ -25,8 +25,13 @@ POZOR: DATA V TETO FAZI MUSI BYT JAK V GLOBALNI TAK V LOKALNI CASTI KOHERENTNI!!
 __device__ void cas(int *local_f, int *local_t, int* global_h, int i, int j, int n, int my_global_pos, int me, int phase)
 {
 //1) Index I mimo blok AND moje globalni_pozice = krajni prvky N
-	if(my_global_pos == 0 && i < 0){return ;} //kontrola leve zarazky
-	if(my_global_pos == (n-1) && j>=n){return ;} //kontrola prave zarazky
+	if((my_global_pos == 0) && i < 0){  //kontrola leve zarazky - jsi na krajni pozici a presahujes blok?
+		return ;
+	} 
+
+	if((my_global_pos == (n-1)) && j>=NUM_OF_THREADS){ //kontrola prave zarazky -> jsi na globalni pozici a presahujes blok?
+		return ;
+	} 
 //2) Jsme v ramci globalniho pole N, muzem zacit provadet vymeny - jsme v ramci bloku mimo krajni prvky? -> pokud ano, trid ve sdilene pameti
 	if( ((i>0 && i<(NUM_OF_THREADS-1)) && (phase == LS)) //pokud nejsi mimo v LS fazi, tak trid v ramci lokalniho pole
 		   || phase == SL){ //pokud mas SL fazi, tak je vse OK a muzes vse tridit v ramci lokalniho pole
@@ -64,7 +69,6 @@ __global__ void oekern(int *h_da, int n, volatile unsigned int* barnos)
 	__shared__ int sData[NUM_OF_THREADS]; //alokace lokalni pameti
 	__shared__ int sData_aux[NUM_OF_THREADS]; //temp datove pole
 	sData[tix] = h_da[d_index]; //prekopiruji si data do lokalni pameti
-
 //2) Pockame, az to udelaji vsichni ve vsech blocich
 	__syncblocks(barnos); 
 
@@ -104,16 +108,17 @@ __global__ void oekern(int *h_da, int n, volatile unsigned int* barnos)
 		h_da[d_index] = sData_aux[tix]; 
 	}
 
-	sData_aux[tix]=sData[tix]; //kazde vlakno si navic osvezi sva data z temp pole
-	
-	#ifdef DEBUG_GLOBAL
+	sData[tix]=sData_aux[tix]; //kazde vlakno si navic osvezi sva data z temp pole
+
+	//prubezne kopirovani do globalni pamet
+	#ifdef DEBUG_GLOBAL	
 	h_da[d_index] = sData[tix];	
-	#endif
-	
-	__syncblocks(barnos); //a pokracovat budeme, az toto dokoci vsechny vlakna ve vsech blocich	
+	#endif	
+
+	__syncblocks(barnos); //a pokracovaudaMemcpy(da,daaux,dasize,cudaMemcpyDeviceToDevice);t budeme, az toto dokoci vsechny vlakna ve vsech blocich	
 	}
 //5) Ukonceno N iteraci ---> nakopirujeme data do globalni pameti
-	h_da[d_index] = sData_aux[tix]; 
+	h_da[d_index] = sData[tix]; 
 }
 
 
@@ -125,9 +130,7 @@ void oddeven(int *ha, int n)
 	HANDLE_ERROR(cudaMalloc((void **)&da, dasize));
 	HANDLE_ERROR(cudaMemcpy(da, ha, dasize, cudaMemcpyHostToDevice));
 	// the array daaux will serve as "scratch space"
-	int *daaux;
-	HANDLE_ERROR(cudaMalloc((void **)&daaux, dasize));
-
+	
 	int numOfBlocks = (int) ceil(ARRAY_SIZE/NUM_OF_THREADS); //number of blocks
 	
 	// ===== alokuj pole pro synchro =====
@@ -147,9 +150,12 @@ void oddeven(int *ha, int n)
 
 	// ===== deme na problem =====	
 	oekern <<< dimGrid, dimBlock >>> (da, n, barnos); //eot sort v radku
+	cudaThreadSynchronize();
+
+	HANDLE_ERROR(cudaMemcpy(ha,da,dasize,cudaMemcpyDeviceToHost));
 	
 	//free malocs
 	HANDLE_ERROR(cudaFree(da));
-	HANDLE_ERROR(cudaFree(daaux));
+	HANDLE_ERROR(cudaFree((void *) barnos));
 }
 

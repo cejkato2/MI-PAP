@@ -23,12 +23,13 @@ run: build
 dbg: build_dbg
 	$(DBG) ./$(EXECUTABLE)
 
+#compile optimized version without debug
 build:	$(CCFILES) $(CUFILES)
-	$(CC) -g -G -O3 $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
+	$(CC) -O3 $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
 
 
 build_dbg: $(CCFILES) $(CUFILES)
-	$(CC) -g -G -O3 -DDEBUG_GLOBAL $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
+	$(CC) -g -G -DDEBUG_GLOBAL $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
 
 clean:
 	rm -f $(EXECUTABLE)
