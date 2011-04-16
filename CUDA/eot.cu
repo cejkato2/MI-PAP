@@ -83,7 +83,7 @@ __global__ void oekern(int *h_da, int n, volatile unsigned int* barnos)
 //Pozn. : SL liche jsou v ramci sdilene pameti. U LS musi krajni vlakna komunikovat prez globalni pamet.
 	unsigned int iter;
 	unsigned int phase;
-	int dir = DESCENDING; //toto se po case nahradi!
+	int dir = ASCENDIG; //toto se po case nahradi!
 
 	for(iter=0; iter < n; iter++){ 
 
@@ -152,6 +152,12 @@ void oddeven(int *ha, int n)
       		}
 	
       		cudaSetDevice(max_device);
+		
+		//vystup vlastnosti
+		printf("Device number --> %d\n", num_devices);
+		printf("Multiprocesor count --> %d\n", max_multiprocessors);
+		printf("========================================\n");
+		printf("Vybrane zarizeni --> %d\n", device);
 	}
 
 	HANDLE_ERROR(cudaMalloc((void **)&da, dasize));

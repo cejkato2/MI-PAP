@@ -6,7 +6,7 @@
 void testSorted(int a[],int size)
 {
 	bool sorted = true;
-	printf("Testuji serazenou posloupnost --->\n");
+	printf("Testuji serazenou posloupnost ---> ");
 	for(int i=1;i<size;i++){
 		if(a[i-1] > a[i]){
 			sorted = false;
