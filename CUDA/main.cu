@@ -42,11 +42,17 @@ int main(int argc, char** argv)
 int* a = new int[ARRAY_SIZE];
 
 generateArray(a, ARRAY_SIZE);
-//printArray(a,ARRAY_SIZE);
+
+#ifdef DEBUG_GLOBAL
+printArray(a,ARRAY_SIZE);
+#endif
 
 oddeven(a,ARRAY_SIZE);
 testSorted(a,ARRAY_SIZE);
 
-//printArray(a,ARRAY_SIZE);
+#ifdef DEBUG_GLOBAL
+printArray(a,ARRAY_SIZE);
+#endif
+
 return 0;
 }
