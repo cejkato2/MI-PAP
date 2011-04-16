@@ -56,14 +56,14 @@ n - velikost trideneho pole
 iter - aktualni iterace
 barnos - pomocne pole pro synchro mezi bloky
 */
-__global__ void oekern(int *h_da, int n,volatile unsigned int* barnos)
+__global__ void oekern(int *h_da, int n, volatile unsigned int* barnos)
 {
 	int tix=threadIdx.x;
 	int d_index=blockIdx.x*NUM_OF_THREADS + tix; //globalni index v poli v hlavni pameti
 //1) Kazde vlakno nakopiruje do lokalni pameti bloku sve data
 	__shared__ int sData[NUM_OF_THREADS]; //alokace lokalni pameti
 	__shared__ int sData_aux[NUM_OF_THREADS]; //temp datove pole
-	sData[tix] = h_da[tix]; //prekopiruji si data do lokalni pameti
+	sData[tix] = h_da[d_index]; //prekopiruji si data do lokalni pameti
 
 //2) Pockame, az to udelaji vsichni ve vsech blocich
 	__syncblocks(barnos); 
@@ -74,22 +74,26 @@ __global__ void oekern(int *h_da, int n,volatile unsigned int* barnos)
 	unsigned int phase;
 	for(iter=0; iter < n; iter++){ 
 
-	//urci fazi
-	if()
+		//urci fazi
+		if((iter%2) == 0){
+			phase = SL;
+		}else{
+			phase = LS;
+		}
 
-		if( (iter%2) == 1){
-		//provadej LS vymenu
+		if(phase == SL){
+		//provadej SL vymenu
 			if( (tix%2) == 0){
-				cas(sData, sData_aux, h_da, tix, tix+1, n, d_index, tix, iter);
+				cas(sData, sData_aux, h_da, tix, tix+1, n, d_index, tix, phase);
 			}else{
-				cas(sData, sData_aux, h_da, tix-1, tix, n, d_index, tix, iter);
+				cas(sData, sData_aux, h_da, tix-1, tix, n, d_index, tix, phase);
 			}
 		}else{
-		//provadej SL vymenu => zacina se zde v prvni iteraci
+		//provadej LS vymenu => zacina se zde v prvni iteraci
 			if( (tix%2) == 1){
-				cas(sData, sData_aux, h_da, tix,tix+1, n, d_index, tix, iter);
+				cas(sData, sData_aux, h_da, tix,tix+1, n, d_index, tix, phase);
 			}else{
-				cas(sData, sData_aux, h_da, tix-1, tix, n, d_index, tix, iter);
+				cas(sData, sData_aux, h_da, tix-1, tix, n, d_index, tix, phase);
 			}
 		}
 //4) Dokoncili jsme jednu vymenu, pockame na vsechny bloky a krajni vlakna osvezi data na svojich pozicich v globalni pameti
@@ -101,6 +105,11 @@ __global__ void oekern(int *h_da, int n,volatile unsigned int* barnos)
 	}
 
 	sData_aux[tix]=sData[tix]; //kazde vlakno si navic osvezi sva data z temp pole
+	
+	#ifdef DEBUG_GLOBAL
+	h_da[d_index] = sData[tix];	
+	#endif
+	
 	__syncblocks(barnos); //a pokracovat budeme, az toto dokoci vsechny vlakna ve vsech blocich	
 	}
 //5) Ukonceno N iteraci ---> nakopirujeme data do globalni pameti

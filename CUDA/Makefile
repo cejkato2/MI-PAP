@@ -15,16 +15,20 @@ CUFILES=\
 CCFILES	= \
 	
 
-default: build
+default: build_dbg
 
 run: build 
 	./$(EXECUTABLE)
 
-dbg: build
+dbg: build_dbg
 	$(DBG) ./$(EXECUTABLE)
 
 build:	$(CCFILES) $(CUFILES)
 	$(CC) -g -G -O3 $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
+
+
+build_dbg: $(CCFILES) $(CUFILES)
+	$(CC) -g -G -O3 -DDEBUG_GLOBAL $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
 
 clean:
 	rm -f $(EXECUTABLE)
