@@ -6,6 +6,7 @@
 #include "constant.h"
 #include <math.h>
 #include "utils/cuda_comparer.cu" //komparator pro cudu
+#include "utils/cuda_address.cu" //relativni posun podle souradnic x,y
 #include <utils/cuda_syn_block.cu> //synchronizace napric barierama -- prasarna vkladat primo ceckovy kod, ale :
 //You must define __device__ functions within the compilation unit they are called in, and their behavior similar to functions declared with the c++ inline keyword.
 
@@ -25,7 +26,7 @@ dir - smysl trideni
 ----------------------------------------------------
 POZOR: DATA V TETO FAZI MUSI BYT JAK V GLOBALNI TAK V LOKALNI CASTI KOHERENTNI!!
 */
-__device__ void cas(int *local_f, int *local_t, int* global_h, int i, int j, int n, int me, int phase,int dir, int my_global_x, int my_global_pos,int col_size)
+__device__ void cas_row(int *local_f, int *local_t, int* global_h, int i, int j, int n, int me, int phase,int dir, int my_global_x, int my_global_pos,int col_size)
 {
 //1) Index I mimo blok AND moje globalni_pozice = krajni prvky N
 	if((my_global_x == 0) && i < 0){  //kontrola leve zarazky - jsi na krajni pozici a presahujes blok?
@@ -61,6 +62,22 @@ __device__ void cas(int *local_f, int *local_t, int* global_h, int i, int j, int
 	}
 }
 
+
+/*
+Sloupcova faze even odd sortu. Vleze se do lokalni pameti
+*/
+__device__ void cas_col(int *local_f, int *local_t, int i, int j, int n, int me){
+	if(i < 0 || j >= n) return;
+	if(me == i){
+		if(local_f[i] > local_f[j]) local_t[me] = local_t[j];
+		else local_t[me]=local_f[i];
+	}else{
+		if(local_f[i] > local_f[j]) local_t[me] = local_t[i];
+		else local_t[me]=local_f[j];
+	}
+}
+
+
 // does one iteration of the sort
 /*
 da - ukazatel od prvniho pole
@@ -74,6 +91,8 @@ __global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, i
 //vypocet souradnice X a Y
 	int tix=threadIdx.x;
 	int d_index=blockIdx.x*NUM_OF_THREADS + tix; //globalni index v poli v hlavni pameti
+
+	int d_copy=d_index;	
 	
 	int y = d_index/col_size; //vypocet Y - radku
 	int x = d_index % col_size; //vypocet X - sloupce	
@@ -81,10 +100,27 @@ __global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, i
 	//1) Kazde vlakno nakopiruje do lokalni pameti bloku sve data
 	__shared__ int sData[NUM_OF_THREADS]; //alokace lokalni pameti
 	__shared__ int sData_aux[NUM_OF_THREADS]; //temp datove pole
+	int num_of_iters; //pocet iteraci
+	int sh_phase=SH_COLUMN_PHASE; //shearsort faze (sloupcove nebo radkove razeni)
+	//int sh_phase=SH_ROW_PHASE; 
+
+	//prekopirovani dat do sdilene pameti - vypocet indexu
+	if(sh_phase == SH_ROW_PHASE){
+		//je radkova faze
+		num_of_iters=col_size;	
+		countAddressIndex(&d_index,x,y,col_size); //vypocet adresy indexu podle 
+	}else{
+		//je sloupcova faze, pokud muzes, tak nacti data
+		if(tix < row_size){
+			num_of_iters=row_size;
+			countAddressIndex(&d_index,y,x,col_size);		
+		}	
+	}
+
 	sData[tix] = h_da[d_index]; //prekopiruji si data do lokalni pameti
 
 	////////// DEBUG ///////////
-// 	h_da[d_index] = d_index;	
+	h_da[d_copy] = d_index;	
 //	h_da[d_index] = x;
 //	h_da[d_index] = y;
 
@@ -97,51 +133,89 @@ __global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, i
 	unsigned int phase;
 	int dir; //toto se po case nahradi!
 
-	for(iter=0; iter < col_size ; iter++){ 
+	for(iter=0; iter < num_of_iters ; iter++){ 
 
-		//urci fazi -> podle tveho radku
+		//urci fazi
 		if((iter%2) == 0){
 			phase = SL;
 		}else{
 			phase = LS;
 		}
 
-		//urci smer razeni
-		if((y%2) == 0){
-			dir=ASCENDIG;
-		}else{
-			dir=DESCENDING;
-		}		
-
-		if(phase == SL){
-		//provadej SL vymenu
-			if( (tix%2) == 0){
-				cas(sData, sData_aux, h_da, tix, tix+1, col_size, tix, phase, dir, x, d_index, col_size);
+		//urci smer razeni ==> podle toho jakou mas fazi
+		if(sh_phase == SH_ROW_PHASE){
+			if((y%2) == 0){
+				dir=ASCENDIG;
 			}else{
-				cas(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index, col_size);
-			}
-		}else{
-		//provadej LS vymenu => zacina se zde v prvni iteraci
-			if( (tix%2) == 1){
-				cas(sData, sData_aux, h_da, tix,tix+1, col_size, tix, phase, dir, x, d_index, col_size);
-			}else{
-				cas(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index, col_size);
+				dir=DESCENDING;
 			}
 		}
+
+		if(sh_phase == SH_COLUMN_PHASE){
+			dir=ASCENDIG;
+		}
+
+		//volani pro radkovou fazi
+		if(sh_phase == SH_ROW_PHASE){		
+
+			if(phase == SL){
+			//provadej SL vymenu
+				if( (tix%2) == 0){
+					cas_row(sData, sData_aux, h_da, tix, tix+1, col_size, tix, phase, dir, x, d_index, col_size);
+				}else{
+					cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index, col_size);
+				}
+			}else{
+			//provadej LS vymenu => zacina se zde v prvni iteraci
+				if( (tix%2) == 1){
+					cas_row(sData, sData_aux, h_da, tix,tix+1, col_size, tix, phase, dir, x, d_index, col_size);
+				}else{
+					cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index, col_size);
+				}
+			}
+		}
+
+
+	if(sh_phase == SH_COLUMN_PHASE){
+	
+			if(phase == SL){
+			//provadej SL vymenu
+				if( (tix%2) == 0){
+					cas_col(sData, sData_aux, tix, tix+1, row_size, tix);
+				}else{
+					cas_col(sData, sData_aux, tix-1, tix, row_size, tix);
+				}
+			}else{
+			//provadej LS vymenu => zacina se zde v prvni iteraci
+				if( (tix%2) == 1){
+					cas_col(sData, sData_aux, tix,tix+1, row_size, tix);
+				}else{
+					cas_col(sData, sData_aux, tix-1, tix, row_size, tix);
+				}
+			}
+		
+	}
+	
 //4) Dokoncili jsme jednu vymenu, pockame na vsechny bloky a krajni vlakna osvezi data na svojich pozicich v globalni pameti
 	__syncblocks(barnos); //pockame az vsichni dodelaji krok
 	
 	//pouze krajni reprezentanti udelaji atualizace v globalni pameti
-	if(tix==0 || tix==(NUM_OF_THREADS-1)){
-		h_da[d_index] = sData_aux[tix]; 
+	if(sh_phase == SH_ROW_PHASE){
+		if(tix==0 || tix==(NUM_OF_THREADS-1)){
+			h_da[d_index] = sData_aux[tix]; 
+		}
 	}
 
 	sData[tix]=sData_aux[tix]; //kazde vlakno si navic osvezi sva data z temp pole
 
 	//prubezne kopirovani do globalni pamet
-	#ifdef DEBUG_GLOBAL	
-	h_da[d_index] = sData[tix];	
-	#endif	
+	if(sh_phase == SH_ROW_PHASE){
+		h_da[d_index] = sData[tix];	
+	}else{
+		if(tix < row_size){
+		h_da[d_index] = sData[tix];
+		}
+	}
 
 	__syncblocks(barnos); //a pokracovaudaMemcpy(da,daaux,dasize,cudaMemcpyDeviceToDevice);t budeme, az toto dokoci vsechny vlakna ve vsech blocich	
 	}
