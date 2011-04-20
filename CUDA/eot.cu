@@ -126,11 +126,11 @@ __global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, i
 		}
 
 		//urci smer razeni
-		//if((y%2) == 0){
-		//	dir=ASCENDIG;
-		//}else{
-		//	dir=DESCENDING;
-		//}		
+		if((y%2) == 0){
+			dir=ASCENDIG;
+		}else{
+			dir=DESCENDING;
+		}		
 
 		if(phase == SL){
 		//provadej SL vymenu
