@@ -61,14 +61,16 @@ if(ARRAY_SIZE <= NUM_OF_THREADS){
 	col=ARRAY_SIZE;
 }else{
 	//rozdelime problem 
-	int blkCount =  (int) ceil(ARRAY_SIZE/NUM_OF_THREADS);
+	//int blkCount =  (int) ceil(ARRAY_SIZE/NUM_OF_THREADS);
 	//najdem co mozny nejvetsi pocet radku
-	row = sqrt(blkCount);
-	while((blkCount%row)!=0){
-		row--;
-	}		
+	//row = sqrt(blkCount);
+	//while((blkCount%row)!=0){
+	//	row--;
+	//}		
 	
-	col=(blkCount/row)*NUM_OF_THREADS;		
+	//col=(blkCount/row)*NUM_OF_THREADS;	
+	row=NUM_OF_THREADS/2;
+	col=ARRAY_SIZE/row;
 }
 
 printf("Matice --> %d radku, %d sloupcu.\n\n",row,col);

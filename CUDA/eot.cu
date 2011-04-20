@@ -19,44 +19,58 @@ global_h - globalni pole pro transpozice
 i,j - indexy
 n - pocet prvku
 my_global_pos - globalni pozice jadra
-me - moje cislo jadra
+me - moje X pozice jako threadu
 phase - aktualni faze sudo licha nebo licho suda
 dir - smysl trideni
+my_global_x - globalni x pozice
+localId - id v lokanlni pameti
+col_size - pocet sloupecku
+blkXDim - sirka bloku v X 
 ----------------------------------------------------
-POZOR: DATA V TETO FAZI MUSI BYT JAK V GLOBALNI TAK V LOKALNI CASTI KOHERENTNI!!
+POZOR: DATA V TETO FAZI MUSI BYT JAK V GLOBALNI TAK V LOKALNI CASTI KOHERENTNI!! A pracuje jenom s X koordinatama vlakna v gridu
 */
-__device__ void cas(int *local_f, int *local_t, int* global_h, int i, int j, int n, int me, int phase,int dir, int my_global_x, int my_global_pos,int col_size)
+__device__ void cas_row(int *local_f, int *local_t, int* global_h, 
+			int i, int j, int n, int me, int phase,int dir, 
+			int my_global_x, int my_global_pos, int localId,int col_size,int blkXDim)
 {
 //1) Index I mimo blok AND moje globalni_pozice = krajni prvky N
 	if((my_global_x == 0) && i < 0){  //kontrola leve zarazky - jsi na krajni pozici a presahujes blok?
 		return ;
 	} 
 
-	if((my_global_x == (col_size-1)) && j>=NUM_OF_THREADS){ //kontrola prave zarazky -> jsi na globalni pozici a presahujes blok?
+	if((my_global_x == (col_size-1)) && j>=blkXDim){ //kontrola prave zarazky -> jsi na globalni pozici a presahujes blok?
 		return ;
-	} 
+	}
+	int ii;
+	int jj; //promenne pro prepocet na faze v lokalni pameti ==> nutne 
 	register bool res; //vysledek komparace
 //2) Jsme v ramci globalniho pole N, muzem zacit provadet vymeny - jsme v ramci bloku mimo krajni prvky? -> pokud ano, trid ve sdilene pameti
-	if( ((i>0 && i<(NUM_OF_THREADS-1)) && (phase == LS)) //pokud nejsi mimo v LS fazi, tak trid v ramci lokalniho pole
+	if( ((i>0 && i<(blkXDim-1)) && (phase == LS)) //pokud nejsi mimo v LS fazi, tak trid v ramci lokalniho pole
 		   || phase == SL){ //pokud mas SL fazi, tak je vse OK a muzes vse tridit v ramci lokalniho pole
-		if (me == i) { //v teto casti jsme v ramci indexu sdileneho pole 
-			compare_k(local_f[i], local_f[j], dir, &res);	
-			if (res == false) local_t[me] = local_f[j];
-			else local_t[me] = local_f[i];
+		if (me == i) { //v teto casti jsme v ramci indexu sdileneho pole
+			ii=localId;
+			jj=localId+1; 
+			compare_k(local_f[ii], local_f[jj], dir, &res);	
+			if (res == false) local_t[ii] = local_f[jj];
+			else local_t[ii] = local_f[ii];
 		} else { // me == j
-			compare_k(local_f[i], local_f[j], dir, &res);	
-			if (res == false) local_t[me] = local_f[i];
-			else local_t[me] = local_f[j];
+			ii=localId-1;
+			jj=localId;
+			compare_k(local_f[ii], local_f[jj], dir, &res);	
+			if (res == false) local_t[jj] = local_f[ii];
+			else local_t[jj] = local_f[jj];
 		}			
 	}else{ //jinak musis komunikovat do globalni pameti, protoze jsi vlakno s krajnim indexem a 
-		if(me == (NUM_OF_THREADS - 1)){ //pokud je me cislo rovno  krajnimu cislu vlakna (tj NUM_OF_THREADS -1) -> jsem i
-			compare_k(local_f[i], global_h[my_global_pos+1], dir, &res);
-			if(res == false) local_t[me] = global_h[my_global_pos+1]; //pokud jsem vetsi jak muj glob. soused, tak si upravim v lokalni pameti data
-			else local_t[me] = local_f[i]; //jinak jsem na to spravne a prekopiruju si to do tmp pole
+		if(me == (blkXDim - 1)){ //pokud je me cislo rovno  krajnimu cislu vlakna (tj NUM_OF_THREADS -1) -> jsem i
+			ii=localId;
+			compare_k(local_f[ii], global_h[my_global_pos+1], dir, &res);
+			if(res == false) local_t[ii] = global_h[my_global_pos+1]; //pokud jsem vetsi jak muj glob. soused, tak si upravim v lokalni pameti data
+			else local_t[ii] = local_f[ii]; //jinak jsem na to spravne a prekopiruju si to do tmp pole
 		}else{//jsem j
-			compare_k(global_h[my_global_pos-1], local_f[j], dir, &res);
-			if(res == false) local_t[me] = global_h[my_global_pos-1]; //pokud je muj globalni soused vetsi jak ja, tak si uravim v lokalni pameti
-			else local_t[me] = local_f[j]; //jinak jsem na tom dobre a nic menit nemusim
+			jj=localId;
+			compare_k(global_h[my_global_pos-1], local_f[jj], dir, &res);
+			if(res == false) local_t[jj] = global_h[my_global_pos-1]; //pokud je muj globalni soused vetsi jak ja, tak si uravim v lokalni pameti
+			else local_t[jj] = local_f[jj]; //jinak jsem na tom dobre a nic menit nemusim
 		}	
 	}
 }
@@ -69,19 +83,24 @@ n - velikost trideneho pole
 iter - aktualni iterace
 barnos - pomocne pole pro synchro mezi bloky
 */
-__global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, int col_size)
+__global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, int col_size,int blkDimX)
 {
 //vypocet souradnice X a Y
 	int tix=threadIdx.x;
-	int d_index=blockIdx.x*NUM_OF_THREADS + tix; //globalni index v poli v hlavni pameti
+	int tiy=threadIdx.y;
+	int localId=tiy*blkDimX + tix;
 	
-	int y = d_index/col_size; //vypocet Y - radku
-	int x = d_index % col_size; //vypocet X - sloupce	
+	//globalni index do pole	
+	int d_index=tiy*col_size + blkDimX*blockIdx.x+tix; //globalni index v poli v hlavni pameti
+	
+	//souradnice x,y globalniho pole
+	int x = blkDimX*blockIdx.x+tix;
+	int y = tiy;
 
 	//1) Kazde vlakno nakopiruje do lokalni pameti bloku sve data
 	__shared__ int sData[NUM_OF_THREADS]; //alokace lokalni pameti
 	__shared__ int sData_aux[NUM_OF_THREADS]; //temp datove pole
-	sData[tix] = h_da[d_index]; //prekopiruji si data do lokalni pameti
+	sData[localId] = h_da[d_index]; //prekopiruji si data do lokalni pameti
 
 	////////// DEBUG ///////////
 // 	h_da[d_index] = d_index;	
@@ -95,7 +114,7 @@ __global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, i
 //Pozn. : SL liche jsou v ramci sdilene pameti. U LS musi krajni vlakna komunikovat prez globalni pamet.
 	unsigned int iter;
 	unsigned int phase;
-	int dir; //toto se po case nahradi!
+	int dir=ASCENDIG; //toto se po case nahradi!
 
 	for(iter=0; iter < col_size ; iter++){ 
 
@@ -107,25 +126,25 @@ __global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, i
 		}
 
 		//urci smer razeni
-		if((y%2) == 0){
-			dir=ASCENDIG;
-		}else{
-			dir=DESCENDING;
-		}		
+		//if((y%2) == 0){
+		//	dir=ASCENDIG;
+		//}else{
+		//	dir=DESCENDING;
+		//}		
 
 		if(phase == SL){
 		//provadej SL vymenu
 			if( (tix%2) == 0){
-				cas(sData, sData_aux, h_da, tix, tix+1, col_size, tix, phase, dir, x, d_index, col_size);
+				cas_row(sData, sData_aux, h_da, tix, tix+1, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
 			}else{
-				cas(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index, col_size);
+				cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
 			}
 		}else{
 		//provadej LS vymenu => zacina se zde v prvni iteraci
 			if( (tix%2) == 1){
-				cas(sData, sData_aux, h_da, tix,tix+1, col_size, tix, phase, dir, x, d_index, col_size);
+				cas_row(sData, sData_aux, h_da, tix,tix+1, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
 			}else{
-				cas(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index, col_size);
+				cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
 			}
 		}
 //4) Dokoncili jsme jednu vymenu, pockame na vsechny bloky a krajni vlakna osvezi data na svojich pozicich v globalni pameti
@@ -133,20 +152,20 @@ __global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, i
 	
 	//pouze krajni reprezentanti udelaji atualizace v globalni pameti
 	if(tix==0 || tix==(NUM_OF_THREADS-1)){
-		h_da[d_index] = sData_aux[tix]; 
+		h_da[d_index] = sData_aux[localId]; 
 	}
 
-	sData[tix]=sData_aux[tix]; //kazde vlakno si navic osvezi sva data z temp pole
+	sData[localId]=sData_aux[localId]; //kazde vlakno si navic osvezi sva data z temp pole
 
 	//prubezne kopirovani do globalni pamet
 	#ifdef DEBUG_GLOBAL	
-	h_da[d_index] = sData[tix];	
+	h_da[d_index] = sData[localId];	
 	#endif	
 
 	__syncblocks(barnos); //a pokracovaudaMemcpy(da,daaux,dasize,cudaMemcpyDeviceToDevice);t budeme, az toto dokoci vsechny vlakna ve vsech blocich	
 	}
 //5) Ukonceno N iteraci ---> nakopirujeme data do globalni pameti
-	h_da[d_index] = sData[tix]; 
+	h_da[d_index] = sData[localId]; 
 }
 
 
@@ -184,8 +203,11 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 	HANDLE_ERROR(cudaMalloc((void **)&da, dasize));
 	HANDLE_ERROR(cudaMemcpy(da, ha, dasize, cudaMemcpyHostToDevice));
 	// the array daaux will serve as "scratch space"
-		
-	int numOfBlocks = (int) ceil(ARRAY_SIZE/NUM_OF_THREADS); //number of blocks
+	
+	int xBlkDim = NUM_OF_THREADS/row_count; //x rozmer bloku
+	int yBlkDim = row_count;
+	int xMatrix = col_count; //x rozmer matice	
+	int numOfBlocks = (int) ceil(xMatrix/xBlkDim); //pocet bloku
 	
 	// ===== alokuj pole pro synchro =====
 	unsigned int* h_barnos = new unsigned int[numOfBlocks]; //pomocne pole
@@ -199,11 +221,11 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 	delete[] h_barnos; //a uklidime po sobe	pole,co nepotrebujeme				
 
 	// ===== priprav sturkturu pro deleni problemu =====
-	dim3 dimGrid(numOfBlocks, 1);
-	dim3 dimBlock(NUM_OF_THREADS, 1, 1);
+	dim3 dimGrid(numOfBlocks, 1); //pustime to na pocet bloku (jak jsme spocitali)
+	dim3 dimBlock(xBlkDim,yBlkDim, 1); //a kazdy blok bude mit rozmery
 
 	// ===== deme na problem =====	
-	oekern <<< dimGrid, dimBlock >>> (da, barnos, row_count, col_count); //eot sort v radku
+	oekern <<< dimGrid, dimBlock >>> (da, barnos, row_count, col_count,xBlkDim); //eot sort v radku
 	cudaThreadSynchronize();
 
 	HANDLE_ERROR(cudaMemcpy(ha,da,dasize,cudaMemcpyDeviceToHost));
