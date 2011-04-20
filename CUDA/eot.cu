@@ -9,6 +9,7 @@
 #include <utils/cuda_syn_block.cu> //synchronizace napric barierama -- prasarna vkladat primo ceckovy kod, ale :
 //You must define __device__ functions within the compilation unit they are called in, and their behavior similar to functions declared with the c++ inline keyword.
 
+
 // compare and swap; copies from the f to t, swapping f[i] and
 // f[j] if the higher-index value is smaller; it is required that i < j
 /*
@@ -24,14 +25,14 @@ dir - smysl trideni
 ----------------------------------------------------
 POZOR: DATA V TETO FAZI MUSI BYT JAK V GLOBALNI TAK V LOKALNI CASTI KOHERENTNI!!
 */
-__device__ void cas(int *local_f, int *local_t, int* global_h, int i, int j, int n, int my_global_pos, int me, int phase,int dir)
+__device__ void cas(int *local_f, int *local_t, int* global_h, int i, int j, int n, int me, int phase,int dir, int my_global_x, int my_global_pos,int col_size)
 {
 //1) Index I mimo blok AND moje globalni_pozice = krajni prvky N
-	if((my_global_pos == 0) && i < 0){  //kontrola leve zarazky - jsi na krajni pozici a presahujes blok?
+	if((my_global_x == 0) && i < 0){  //kontrola leve zarazky - jsi na krajni pozici a presahujes blok?
 		return ;
 	} 
 
-	if((my_global_pos == (n-1)) && j>=NUM_OF_THREADS){ //kontrola prave zarazky -> jsi na globalni pozici a presahujes blok?
+	if((my_global_x == (col_size-1)) && j>=NUM_OF_THREADS){ //kontrola prave zarazky -> jsi na globalni pozici a presahujes blok?
 		return ;
 	} 
 	register bool res; //vysledek komparace
@@ -68,14 +69,25 @@ n - velikost trideneho pole
 iter - aktualni iterace
 barnos - pomocne pole pro synchro mezi bloky
 */
-__global__ void oekern(int *h_da, int n, volatile unsigned int* barnos)
+__global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, int col_size)
 {
+//vypocet souradnice X a Y
 	int tix=threadIdx.x;
 	int d_index=blockIdx.x*NUM_OF_THREADS + tix; //globalni index v poli v hlavni pameti
-//1) Kazde vlakno nakopiruje do lokalni pameti bloku sve data
+	
+	int y = d_index/col_size; //vypocet Y - radku
+	int x = d_index % col_size; //vypocet X - sloupce	
+
+	//1) Kazde vlakno nakopiruje do lokalni pameti bloku sve data
 	__shared__ int sData[NUM_OF_THREADS]; //alokace lokalni pameti
 	__shared__ int sData_aux[NUM_OF_THREADS]; //temp datove pole
 	sData[tix] = h_da[d_index]; //prekopiruji si data do lokalni pameti
+
+	////////// DEBUG ///////////
+// 	h_da[d_index] = d_index;	
+//	h_da[d_index] = x;
+//	h_da[d_index] = y;
+
 //2) Pockame, az to udelaji vsichni ve vsech blocich
 	__syncblocks(barnos); 
 
@@ -83,30 +95,37 @@ __global__ void oekern(int *h_da, int n, volatile unsigned int* barnos)
 //Pozn. : SL liche jsou v ramci sdilene pameti. U LS musi krajni vlakna komunikovat prez globalni pamet.
 	unsigned int iter;
 	unsigned int phase;
-	int dir = ASCENDIG; //toto se po case nahradi!
+	int dir; //toto se po case nahradi!
 
-	for(iter=0; iter < n; iter++){ 
+	for(iter=0; iter < col_size ; iter++){ 
 
-		//urci fazi
+		//urci fazi -> podle tveho radku
 		if((iter%2) == 0){
 			phase = SL;
 		}else{
 			phase = LS;
 		}
 
+		//urci smer razeni
+		if((y%2) == 0){
+			dir=ASCENDIG;
+		}else{
+			dir=DESCENDING;
+		}		
+
 		if(phase == SL){
 		//provadej SL vymenu
 			if( (tix%2) == 0){
-				cas(sData, sData_aux, h_da, tix, tix+1, n, d_index, tix, phase, dir);
+				cas(sData, sData_aux, h_da, tix, tix+1, col_size, tix, phase, dir, x, d_index, col_size);
 			}else{
-				cas(sData, sData_aux, h_da, tix-1, tix, n, d_index, tix, phase, dir);
+				cas(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index, col_size);
 			}
 		}else{
 		//provadej LS vymenu => zacina se zde v prvni iteraci
 			if( (tix%2) == 1){
-				cas(sData, sData_aux, h_da, tix,tix+1, n, d_index, tix, phase, dir);
+				cas(sData, sData_aux, h_da, tix,tix+1, col_size, tix, phase, dir, x, d_index, col_size);
 			}else{
-				cas(sData, sData_aux, h_da, tix-1, tix, n, d_index, tix, phase, dir);
+				cas(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index, col_size);
 			}
 		}
 //4) Dokoncili jsme jednu vymenu, pockame na vsechny bloky a krajni vlakna osvezi data na svojich pozicich v globalni pameti
@@ -131,9 +150,10 @@ __global__ void oekern(int *h_da, int n, volatile unsigned int* barnos)
 }
 
 
-void oddeven(int *ha, int n)
+void ShearOddeven(int *ha, int row_count,int col_count)
 {
 	int *da;
+	int n = row_count*col_count;
 	int dasize = n * sizeof(int);
 
 	//choose best device
@@ -159,6 +179,7 @@ void oddeven(int *ha, int n)
 		printf("========================================\n");
 		printf("Vybrane zarizeni --> %d\n", device);
 	}
+	printf("Pocet threadu --> %d\n\n",NUM_OF_THREADS);
 
 	HANDLE_ERROR(cudaMalloc((void **)&da, dasize));
 	HANDLE_ERROR(cudaMemcpy(da, ha, dasize, cudaMemcpyHostToDevice));
@@ -182,7 +203,7 @@ void oddeven(int *ha, int n)
 	dim3 dimBlock(NUM_OF_THREADS, 1, 1);
 
 	// ===== deme na problem =====	
-	oekern <<< dimGrid, dimBlock >>> (da, n, barnos); //eot sort v radku
+	oekern <<< dimGrid, dimBlock >>> (da, barnos, row_count, col_count); //eot sort v radku
 	cudaThreadSynchronize();
 
 	HANDLE_ERROR(cudaMemcpy(ha,da,dasize,cudaMemcpyDeviceToHost));
