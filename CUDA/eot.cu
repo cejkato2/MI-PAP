@@ -75,13 +75,45 @@ __device__ void cas_row(int *local_f, int *local_t, int* global_h,
 	}
 }
 
-// does one iteration of the sort
+
+/*
+local_f,local_t - ostre a tmp pole
+i,j - indexy prvku na porovnani
+n - pocet prvku
+meId - moje lokalni I lokalni ID
+blkXDim - dimenze bloku
+*/
+//POZOR!! Indexy i a j jsou efektivni ukazatele do lokalni pameti
+__device__ void cas_col(int *local_f, int *local_t, int i, int j, int max_index, int meId)
+{
+	if(i < 0 || j>=max_index){ //kontrola zarazek
+		return;
+	}
+
+	if(meId == i){ 
+	//me==i
+		if(local_f[i] > local_f[j]){
+			local_t[meId]=local_f[j];	
+		}else{
+			local_t[meId]=local_f[i];
+		}
+	}else{
+	//me==j
+		if(local_f[i] > local_f[j]){
+			local_t[meId]=local_f[i];
+		}else{
+			local_t[meId]=local_f[j];
+		}
+	}
+}
+
 /*
 da - ukazatel od prvniho pole
 daaux - ukazatel do temp pole
 n - velikost trideneho pole
 iter - aktualni iterace
 barnos - pomocne pole pro synchro mezi bloky
+blkDimX - dimense X bloku
 */
 __global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, int col_size,int blkDimX)
 {
@@ -110,13 +142,23 @@ __global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, i
 //2) Pockame, az to udelaji vsichni ve vsech blocich
 	__syncblocks(barnos); 
 
+	//int sh_iter = SH_ROW;
+	int sh_iter = SH_COL;
 //3) N-krat budeme opakovat transpozice nad svou casti dat
 //Pozn. : SL liche jsou v ramci sdilene pameti. U LS musi krajni vlakna komunikovat prez globalni pamet.
 	unsigned int iter;
-	unsigned int phase;
-	int dir=ASCENDIG; //toto se po case nahradi!
+	unsigned int phase; //SL nebo LS faze porovnani
+	int dir; //smer razeni
+        int numOfIter;
 
-	for(iter=0; iter < col_size ; iter++){ 
+	//vyber poctu iteraci	
+	if(sh_iter == SH_ROW){
+		numOfIter=col_size;
+	}else{
+		numOfIter=row_size;
+	}	
+
+	for(iter=0; iter < numOfIter ; iter++){ 
 
 		//urci fazi -> podle tveho radku
 		if((iter%2) == 0){
@@ -126,25 +168,48 @@ __global__ void oekern(int *h_da, volatile unsigned int* barnos, int row_size, i
 		}
 
 		//urci smer razeni
-		if((y%2) == 0){
-			dir=ASCENDIG;
-		}else{
-			dir=DESCENDING;
-		}		
-
-		if(phase == SL){
-		//provadej SL vymenu
-			if( (tix%2) == 0){
-				cas_row(sData, sData_aux, h_da, tix, tix+1, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
+		if(sh_iter == SH_ROW){
+			if((y%2) == 0){
+				dir=ASCENDIG;
 			}else{
-				cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
+				dir=DESCENDING;
 			}
 		}else{
-		//provadej LS vymenu => zacina se zde v prvni iteraci
-			if( (tix%2) == 1){
-				cas_row(sData, sData_aux, h_da, tix,tix+1, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
+			dir=ASCENDIG;
+		}
+				
+
+		
+		if(sh_iter == SH_ROW){
+			if(phase == SL){
+			//provadej SL vymenu
+				if( (tix%2) == 0){
+					cas_row(sData, sData_aux, h_da, tix, tix+1, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
+				}else{
+					cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
+				}
 			}else{
-				cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
+			//provadej LS vymenu => zacina se zde v prvni iteraci
+				if( (tix%2) == 1){
+					cas_row(sData, sData_aux, h_da, tix,tix+1, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
+				}else{
+					cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
+				}
+			}
+		}else{
+		//SH_COLUMN faze
+			if(phase == SL){
+				if((tiy%2) == 0){
+					cas_col(sData, sData_aux, localId, localId+blkDimX, NUM_OF_THREADS, localId);	
+				}else{
+					cas_col(sData, sData_aux, localId-blkDimX, localId, NUM_OF_THREADS, localId);
+				}
+			}else{
+				if((tiy%2) == 1){
+					cas_col(sData, sData_aux, localId, localId+blkDimX, NUM_OF_THREADS, localId);
+				}else{
+					cas_col(sData, sData_aux, localId-blkDimX, localId, NUM_OF_THREADS, localId);
+				}
 			}
 		}
 //4) Dokoncili jsme jednu vymenu, pockame na vsechny bloky a krajni vlakna osvezi data na svojich pozicich v globalni pameti

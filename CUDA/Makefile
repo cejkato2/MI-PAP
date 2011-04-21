@@ -35,4 +35,4 @@ build_dbg: $(CCFILES) $(CUFILES)
 	$(CC) -g -G -DDEBUG_GLOBAL $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
 
 clean:
-	rm -f $(EXECUTABLE)
+	rm -f $(EXECUTABLE) .*.swp

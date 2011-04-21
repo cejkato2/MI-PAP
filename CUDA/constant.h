@@ -10,6 +10,10 @@
 #define SL 0
 #define LS 1
 
+/*konstanty pro aktualni faze shearu*/
+#define SH_ROW 1
+#define SH_COL 2
+
 /*smer sortovani*/
 #define ASCENDIG 0
 #define DESCENDING 1
