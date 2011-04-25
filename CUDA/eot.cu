@@ -248,6 +248,13 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 	int *da;
 	int n = row_count*col_count;
 	int dasize = n * sizeof(int);
+	//mereni casu
+	cudaEvent_t start, stop;
+	float elapsedTime;
+	
+	HANDLE_ERROR( cudaEventCreate( &start ) );
+	HANDLE_ERROR( cudaEventCreate( &stop ) );
+
 
 	//choose best device
 	int num_devices, device;
@@ -299,11 +306,25 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 	dim3 dimBlock(xBlkDim,yBlkDim, 1); //a kazdy blok bude mit rozmery
 
 	// ===== deme na problem =====	
+	HANDLE_ERROR( cudaEventRecord( start, 0 ) );
 	ShearOekern <<< dimGrid, dimBlock >>> (da, barnos, row_count, col_count,xBlkDim); //shearsort
 	cudaThreadSynchronize();
+	HANDLE_ERROR( cudaEventRecord( stop, 0 ) );
 
+	//zjisteni casu
+	HANDLE_ERROR( cudaEventSynchronize( stop ) );
+	HANDLE_ERROR( cudaEventElapsedTime( &elapsedTime, start, stop ) );
+	printf("\n\n-----------------------------------------------------\n");
+	printf( "GPU čas: %g ms\n", elapsedTime );
+	printf("-----------------------------------------------------\n\n");
+
+	//kopirovani vysledku
 	HANDLE_ERROR(cudaMemcpy(ha,da,dasize,cudaMemcpyDeviceToHost));
 	
+	//uklizeni
+	HANDLE_ERROR( cudaEventDestroy( start ) );
+	HANDLE_ERROR( cudaEventDestroy( stop ) );
+
 	//free malocs
 	HANDLE_ERROR(cudaFree(da));
 	HANDLE_ERROR(cudaFree((void *) barnos));
