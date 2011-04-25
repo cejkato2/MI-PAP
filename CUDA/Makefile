@@ -23,6 +23,9 @@ run: build
 dbg: build_dbg
 	$(DBG) ./$(EXECUTABLE)
 
+dbg_run: build_dbg
+	./$(EXECUTABLE)
+
 #compile optimized version without debug
 build:	$(CCFILES) $(CUFILES)
 	$(CC) -O3 $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
@@ -32,4 +35,4 @@ build_dbg: $(CCFILES) $(CUFILES)
 	$(CC) -g -G -DDEBUG_GLOBAL $(CCFILES)  $(CUFILES) -o $(EXECUTABLE)
 
 clean:
-	rm -f $(EXECUTABLE)
+	rm -f $(EXECUTABLE) .*.swp

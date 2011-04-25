@@ -2,12 +2,14 @@
 #include <stdlib.h>
 #include "eot.cuh" //eot sort in cuda
 #include "constant.h"
+#include <math.h>
 
+//jednorozmerne pole se bere jako 2D pole
 void testSorted(int a[],int size)
 {
 	bool sorted = true;
-	printf("Testuji serazenou posloupnost --->\n");
-	for(int i=1;i<size;i++){
+	printf("Testuji serazenou posloupnost ---> ");
+	for(int i=1;i<size/2;i++){
 		if(a[i-1] > a[i]){
 			sorted = false;
 			break;
@@ -22,6 +24,7 @@ void testSorted(int a[],int size)
 
 void generateArray(int a[],int size)
 {
+	printf("Generuji testovaci data .. (%d)\n",size);
 	srand(time(NULL));
 	for(int i=0;i<size;i++){
 	  a[i]=(rand() % MODULE);
@@ -29,10 +32,15 @@ void generateArray(int a[],int size)
 }
 
 
-void printArray(int a[],int size)
+void printArray(int a[],int row,int col)
 {
-	for(int i=0;i<size;i++){
-		printf("%d ",a[i]);
+	int index;
+	for(int i=0;i<row;i++){
+		for(int j=0;j<col;j++){
+			index=i*col + j;		
+			printf("%d ",a[index]);
+		}
+	printf("\n");
 	}
 	printf("\n");
 }
@@ -43,15 +51,38 @@ int* a = new int[ARRAY_SIZE];
 
 generateArray(a, ARRAY_SIZE);
 
+//pocet radku a sloupcu problemu
+int col;
+int row; 
+
+if(ARRAY_SIZE <= NUM_OF_THREADS){
+	//nema cenu delit problem
+	row=1;
+	col=ARRAY_SIZE;
+}else{
+	//rozdelime problem 
+	//int blkCount =  (int) ceil(ARRAY_SIZE/NUM_OF_THREADS);
+	//najdem co mozny nejvetsi pocet radku
+	//row = sqrt(blkCount);
+	//while((blkCount%row)!=0){
+	//	row--;
+	//}		
+	
+	//col=(blkCount/row)*NUM_OF_THREADS;	
+	row=NUM_OF_THREADS/2;
+	col=ARRAY_SIZE/row;
+}
+
+printf("Matice --> %d radku, %d sloupcu.\n\n",row,col);
+
 #ifdef DEBUG_GLOBAL
-printArray(a,ARRAY_SIZE);
+printArray(a,row,col);
 #endif
 
-oddeven(a,ARRAY_SIZE);
-testSorted(a,ARRAY_SIZE);
+ShearOddeven(a,row,col);
 
 #ifdef DEBUG_GLOBAL
-printArray(a,ARRAY_SIZE);
+printArray(a,row,col);
 #endif
 
 return 0;
