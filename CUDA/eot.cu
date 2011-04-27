@@ -305,10 +305,14 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 	dim3 dimGrid(numOfBlocks, 1); //pustime to na pocet bloku (jak jsme spocitali)
 	dim3 dimBlock(xBlkDim,yBlkDim, 1); //a kazdy blok bude mit rozmery
 
+	printf("Pocet bloku-->%d\n",numOfBlocks);
+	printf("Rozmery bloku--> %d radku, %d sloupcu\n",yBlkDim,xBlkDim);
 	// ===== deme na problem =====	
 	HANDLE_ERROR( cudaEventRecord( start, 0 ) );
 	ShearOekern <<< dimGrid, dimBlock >>> (da, barnos, row_count, col_count,xBlkDim); //shearsort
 	cudaThreadSynchronize();
+	HANDLE_ERROR(cudaMemcpy(ha,da,dasize,cudaMemcpyDeviceToHost));
+	
 	HANDLE_ERROR( cudaEventRecord( stop, 0 ) );
 
 	//zjisteni casu
@@ -318,9 +322,6 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 	printf( "GPU čas: %g ms\n", elapsedTime );
 	printf("-----------------------------------------------------\n\n");
 
-	//kopirovani vysledku
-	HANDLE_ERROR(cudaMemcpy(ha,da,dasize,cudaMemcpyDeviceToHost));
-	
 	//uklizeni
 	HANDLE_ERROR( cudaEventDestroy( start ) );
 	HANDLE_ERROR( cudaEventDestroy( stop ) );
