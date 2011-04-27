@@ -49,22 +49,24 @@ Semestrální práce spočívala v implementaci vybraných řadících algoritm�
 řešení na počítači se sdílenou pamětí s použítím knihovny OpenMP a následně s využitím technologie CUDA
 společnosti NVIDIA\textsuperscript{\tiny{\textregistered}}.
 
+\label{sec:reseni}
 \subsection{Řešení}
-Vytvořili jsme si základní moduly \textbf{Loader} a \textbf{Array} (případně ještě pro Shearsort 
-\textbf{Array2D}), které sdílíme mezi jednotlivými implementacemi algoritmů.
+Algoritmy byly ve své podstatě navrženy tak, aby co nejlépe seděli možnostem a architektuře CUDA. Bylo dbáno na několik základních vlastností. A to:
+\begin{itemize}
+	\item co největší počet vláken v bloku
+	\item co nejvíce nezávislých bloků
+	\item minimalizace komunikace do globální paměti
+\end{itemize}
+
+Tyto části jsou společné pro všechny algoritmy pro CUDA. Zaručují jistou rychlost a škálovatelnost problému.
+
 \section{Popis paralelního algoritmu a jeho implementace v CUDA}
 \subsection{Sudo-lichý mergesort}
 
 \subsection{Bitonic sort}
 
 \subsection{Shearsort}
-Vzhledem k možnosti HW v grafickém akcelerátoru jsme zvolili implementaci pomoci even odd transpozition sortu. Toto využívání je možné zejména díky schopnosti vytvořit velký počet vláken v zařízení (a to,že každý prvek v poli má své vlastní vlákno). Při samotné implementaci bylo dbáno na několik základních pravidel a to:
-\begin{itemize}
-	\item co možný největší počet vláken v bloku
-	\item nezávislost jednotlivých bloků
-	\item co největší část algoritmu na grafické kartě
-	\item minimalizace komunikace do globální paměti
-\end{itemize}
+Vzhledem k možnosti HW v grafickém akcelerátoru jsme zvolili implementaci pomoci even odd transpozition sortu. Toto využívání je možné zejména díky schopnosti vytvořit velký počet vláken v zařízení (a to,že každý prvek v poli má své vlastní vlákno). Při samotné implementaci bylo dbáno na několik základních pravidel. A to pravidla v úvodní části \ref{sec:reseni}.
 
 Po nastartování kernelu se provede nakopírování dat do sdílené paměti. Samotné řazení probíhá ve sdílené paměti a mimo bloková komunikace (výměna) probíhá přez globální paměť (kde komunikaci provádí POUZE prvky na přechodu mezi bloky). 
 
@@ -75,6 +77,7 @@ Program si sám spočítá rozložení matice tak, aby se do globální paměti 
 
 \section{Naměřené výsledky a vyhodnocení}
 \subsection{Způsob měření}
+Měření bylo prováděno nad daty, které se generovalo pro každý každý problém znova a které samozřejmě do doby běhu algoritmu nebylo započítáno. Měření času bylo prováděno prostředky z CUDA SDK. Pro vyhodnocení jsme zvolili konstatní počet vláken na blok.
 
 \subsection{Naměřené časy}
 
@@ -86,7 +89,23 @@ Program si sám spočítá rozložení matice tak, aby se do globální paměti 
 \subsubsection{Sekvenční Bitonic sort}
 
 \subsubsection{Shearsort}
-
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|}
+\hline Množství dat (2\textsuperscript{n}) & Čas \\ \hline
+6 &  0,00191242 \\ \hline
+7 &  0,00198106 \\ \hline
+8 &  0,00355130 \\ \hline
+9 &  0,00360128 \\ \hline
+10 & 0,00558307 \\ \hline
+11 & 0,01193860 \\ \hline
+12 & 0,04350320 \\ \hline
+13 & 0,24930300 \\ \hline
+14 & 1,28781000 \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Shearsort}
+\end{table}
 
 \subsubsection{Even-Odd Mergesort}
 
@@ -94,6 +113,8 @@ Program si sám spočítá rozložení matice tak, aby se do globální paměti 
 
 \subsubsection{Bitonic sort}
 \subsubsection{Even-Odd Mergesort}
+
+\subsection{Shearsort}
 
 \subsection{Vyhodnocení}
 \section{Literatura}
