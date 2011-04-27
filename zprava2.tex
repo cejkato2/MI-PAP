@@ -61,10 +61,6 @@ Algoritmy byly ve své podstatě navrženy tak, aby co nejlépe seděli možnost
 Tyto části jsou společné pro všechny algoritmy pro CUDA. Zaručují jistou rychlost a škálovatelnost problému.
 
 \section{Popis paralelního algoritmu a jeho implementace v CUDA}
-\subsection{Sudo-lichý mergesort}
-
-\subsection{Bitonic sort}
-
 \subsection{Shearsort}
 Vzhledem k možnosti HW v grafickém akcelerátoru jsme zvolili implementaci pomoci even odd transpozition sortu. Toto využívání je možné zejména díky schopnosti vytvořit velký počet vláken v zařízení (a to,že každý prvek v poli má své vlastní vlákno). Při samotné implementaci bylo dbáno na několik základních pravidel. A to pravidla v úvodní části \ref{sec:reseni}.
 
@@ -74,6 +70,14 @@ Samotný shearsort byl implementován jako kernel, tak veškerá část algoritm
 
 Program si sám spočítá rozložení matice tak, aby se do globální paměti vlezl celý sloupec 2D matice.
 
+\subsection{Sudo-lichý mergesort, Bitonic sort}
+Řešení algoritmů sudo-lichý mergesort a bitonic sort jsme nalezli v ukázkových příkladech, dodávaných společně s SDK, stažitelných
+ze stránek společnosti
+NVIDIA. Jedná se o příklad pojmenovaný \textbf{sortingNetworks}. Spustitelný program, který se v příkladu generoval, prováděl
+řazení pouze algoritmem Bitonic sort. Zdrojový kód v \textbf{main.cpp} jsme proto upravili tak, aby se dal spustit i sudo-lichý mergesort.
+Program nyní očekává při spuštění jeden parametr a to buď \emph{bitonic} nebo \emph{eom} a podle toho se použije řadící algoritmus.
+SortingNetworks jsme přesunuli z adresářové struktury příkladů tak, aby se dal zkompilovat samostatně a nezávisle na příkladech
+a k tomu jsme upravili soubor Makefile.
 
 \section{Naměřené výsledky a vyhodnocení}
 \subsection{Způsob měření}
