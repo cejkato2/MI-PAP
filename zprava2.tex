@@ -80,14 +80,6 @@ Program si sám spočítá rozložení matice tak, aby se do globální paměti 
 Měření bylo prováděno nad daty, které se generovalo pro každý každý problém znova a které samozřejmě do doby běhu algoritmu nebylo započítáno. Měření času bylo prováděno prostředky z CUDA SDK. Pro vyhodnocení jsme zvolili konstatní počet vláken na blok.
 
 \subsection{Naměřené časy}
-
-\subsubsection{Sekvenční Mergesort}
-
-\subsubsection{Sekvenční Even-Odd Mergesort}
-
-
-\subsubsection{Sekvenční Bitonic sort}
-
 \subsubsection{Shearsort}
 \begin{table}[H]
 \begin{center}
@@ -105,16 +97,46 @@ Měření bylo prováděno nad daty, které se generovalo pro každý každý pr
 \end{tabular} 
 \end{center}
 \caption{Shearsort}
-\end{table}
+\end{table} 
 
 \subsubsection{Even-Odd Mergesort}
-
-\subsection{Zrychlení}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|}
+\hline Množství dat (2\textsuperscript{n}) & Čas \\ \hline
+6       &  0.001378000 \\ \hline
+7       &  0.001691000 \\ \hline
+8       &  0.002085000 \\ \hline
+9       &  0.002512000 \\ \hline
+10      &  0.002978000 \\ \hline
+11      &  0.003739000 \\ \hline
+12      &  0.004578000 \\ \hline
+13      &  0.005573000 \\ \hline
+14      &  0.006700000 \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Even-Odd Mergesort}
+\end{table} 
 
 \subsubsection{Bitonic sort}
-\subsubsection{Even-Odd Mergesort}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|}
+\hline Množství dat (2\textsuperscript{n}) & Čas \\ \hline
+6       &  0.001399000 \\ \hline
+7       &  0.001699000 \\ \hline
+8       &  0.002082000 \\ \hline
+9       &  0.002499000 \\ \hline
+10      &  0.002951000 \\ \hline
+11      &  0.005144000 \\ \hline
+12      &  0.007467000 \\ \hline
+13      &  0.009914000 \\ \hline
+14      &  0.012502000 \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Bitonic sort}
+\end{table} 
 
-\subsection{Shearsort}
 
 \subsection{Vyhodnocení}
 \section{Literatura}
@@ -122,10 +144,5 @@ Měření bylo prováděno nad daty, které se generovalo pro každý každý pr
 \item \href{https://edux.fit.cvut.cz/courses/MI-PAP}{Stránky předmětu MI-PAP}
 \item \href{http://aggregate.org/MAGIC/#GPU SyncBlocks}{\label{cud:synblocks}GPU synblocks}
 \end{enumerate}
-
-
-\appendix
-\section{Grafy závislosti času na počtu vláken}
-
 
 \end{document}
