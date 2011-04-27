@@ -79,7 +79,7 @@ Program nyní očekává při spuštění jeden parametr a to buď \emph{bitonic
 SortingNetworks jsme přesunuli z adresářové struktury příkladů tak, aby se dal zkompilovat samostatně a nezávisle na příkladech
 a k tomu jsme upravili soubor Makefile.
 
-\section{Naměřené výsledky a vyhodnocení}
+\section{Naměřené výsledky}
 \subsection{Způsob měření}
 Měření bylo prováděno nad daty, které se generovalo pro každý každý problém znova a které samozřejmě do doby běhu algoritmu nebylo započítáno. Měření času bylo prováděno prostředky z CUDA SDK. Pro vyhodnocení jsme zvolili konstatní počet vláken na blok.
 
@@ -142,11 +142,15 @@ Měření bylo prováděno nad daty, které se generovalo pro každý každý pr
 \end{table} 
 
 
-\subsection{Vyhodnocení}
+\section{Závěr}
+Po seznámení se se základním principem práce s technologií CUDA jsme začali pracovat na paralelizaci řadících algoritmů touto druhou variantou. Oproti použití technologie OpenMP vyžadovala implementace mnohem větší úsilí, takže jsme stihli realizaci algoritmu shearsort. Naštěstí jsme zbylé dva algoritmy našli v příkladech od společnosti NVIDIA, takže pro měření jsme použili mírně modifikované (co do spouštění) tyto implementace.
+
+Technologie CUDA respektive použitá grafická karta nám umožnila využít mnohem více spuštěných vláken oproti např. OpenMP bez nezanedbatelného zvýšení režie, která s použitím vláken v OS souvisí. 
 \section{Literatura}
 \begin{enumerate}
 \item \href{https://edux.fit.cvut.cz/courses/MI-PAP}{Stránky předmětu MI-PAP}
 \item \href{http://aggregate.org/MAGIC/#GPU SyncBlocks}{\label{cud:synblocks}GPU synblocks}
+\item \href{http://www.root.cz/serialy/uvod-do-technologie-cuda/}{Seriál o technologii CUDA na serveru Root.cz}
 \end{enumerate}
 
 \end{document}
