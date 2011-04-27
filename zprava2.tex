@@ -1,0 +1,110 @@
+\documentclass[12pt]{article}
+%\usepackage{epsf,epic,eepic,eepicemu}
+%\documentstyle[epsf,epic,eepic,eepicemu]{article}
+%\usepackage[cp1250]{inputenc}
+\usepackage[utf8]{inputenc}
+\usepackage[czech, english]{babel}
+\usepackage{czech}
+\usepackage[T1]{fontenc} 
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{lmodern}
+\usepackage{float}
+
+\makeindex
+
+\begin{document}
+%\oddsidemargin=-5mm \evensidemargin=-5mm \marginparwidth=.08in
+%\marginparsep=.01in \marginparpush=5pt \topmargin=-15mm
+%\headheight=12pt \headsep=25pt \footheight=12pt \footskip=30pt
+%\textheight=25cm \textwidth=17cm \columnsep=2mm \columnseprule=1pt
+%\parindent=15pt\parskip=2pt
+
+\begin{center}
+\bf Semestrální projekt MI-PAP 2010/2011:\\[5mm]
+    Paralelní řadící algoritmy\\[5mm]
+    Pavel Benáček\\   
+    Tomáš Čejka\\[2mm]
+magisterské studijum, FIT ČVUT, Kolejní 550/2, 160 00 Praha 6\\[2mm]
+\today
+\end{center}
+\newpage
+
+\tableofcontents
+\listoftables
+\newpage
+\section{Definice problému a popis sekvenčního algoritmu}
+\subsection{Zadání}
+Podle zadání semestrální práce je úkolem implementace aspoň tří z následujících
+řadících algoritmů: Shearsort, 3D sort, Sudo-lichý Mergesort a Bitonic sort.
+
+Pro řešení jsme si vybrali algoritmy Shearsort, Sudo-lichý Mergesort a Bitonic sort.
+
+Pro účely měření času běhu výsledných programů a porovnání paralelních algoritmů se sekvenčním
+řazením jsme si implementovali sekvenční algoritmus Mergesort a ten vzali jako referenční sekvenční
+řešení.
+
+Semestrální práce spočívala v implementaci vybraných řadících algoritmů jako sekvenční řešení, paralelní
+řešení na počítači se sdílenou pamětí s použítím knihovny OpenMP a následně s využitím technologie CUDA
+společnosti NVIDIA\textsuperscript{\tiny{\textregistered}}.
+
+\subsection{Řešení}
+Vytvořili jsme si základní moduly \textbf{Loader} a \textbf{Array} (případně ještě pro Shearsort 
+\textbf{Array2D}), které sdílíme mezi jednotlivými implementacemi algoritmů.
+\section{Popis paralelního algoritmu a jeho implementace v CUDA}
+\subsection{Sudo-lichý mergesort}
+
+\subsection{Bitonic sort}
+
+\subsection{Shearsort}
+Vzhledem k možnosti HW v grafickém akcelerátoru jsme zvolili implementaci pomoci even odd transpozition sortu. Toto využívání je možné zejména díky schopnosti vytvořit velký počet vláken v zařízení (a to,že každý prvek v poli má své vlastní vlákno). Při samotné implementaci bylo dbáno na několik základních pravidel a to:
+\begin{itemize}
+	\item co možný největší počet vláken v bloku
+	\item nezávislost jednotlivých bloků
+	\item co největší část algoritmu na grafické kartě
+	\item minimalizace komunikace do globální paměti
+\end{itemize}
+
+Po nastartování kernelu se provede nakopírování dat do sdílené paměti. Samotné řazení probíhá ve sdílené paměti a mimo bloková komunikace (výměna) probíhá přez globální paměť (kde komunikaci provádí POUZE prvky na přechodu mezi bloky). 
+
+Samotný shearsort byl implementován jako kernel, tak veškerá část algoritmu běží na GPU. Pro tuto příležitost byl implementován algoritmus synchronizace mezi bloky, který byl popsán v \ref{cud:synblocks}. Tento algoritmus nám umožnil synchronizaci mezi bloky a tak se nemuselo z kernelu vystupovat a provádět synchronizaci bloků v rámci programu hosta.
+
+Program si sám spočítá rozložení matice tak, aby se do globální paměti vlezl celý sloupec 2D matice.
+
+
+\section{Naměřené výsledky a vyhodnocení}
+\subsection{Způsob měření}
+
+\subsection{Naměřené časy}
+
+\subsubsection{Sekvenční Mergesort}
+
+\subsubsection{Sekvenční Even-Odd Mergesort}
+
+
+\subsubsection{Sekvenční Bitonic sort}
+
+\subsubsection{Shearsort}
+
+
+\subsubsection{Even-Odd Mergesort}
+
+\subsection{Zrychlení}
+
+\subsubsection{Bitonic sort}
+\subsubsection{Even-Odd Mergesort}
+
+\subsection{Vyhodnocení}
+\section{Literatura}
+\begin{enumerate}
+\item \href{https://edux.fit.cvut.cz/courses/MI-PAP}{Stránky předmětu MI-PAP}
+\item \href{http://aggregate.org/MAGIC/#GPU SyncBlocks}{\label{cud:synblocks}GPU synblocks}
+\end{enumerate}
+
+
+\appendix
+\section{Grafy závislosti času na počtu vláken}
+
+
+\end{document}

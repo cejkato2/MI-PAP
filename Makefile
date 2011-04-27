@@ -46,4 +46,9 @@ testloader: testloader.cpp
 
 gentests: all
 	utils/testmes.sh
+reports:
+	pdfcslatex -halt-on-error zprava1.tex
+	pdfcslatex -halt-on-error zprava2.tex
 
+clean_rep:
+	rm -f *.aux *.dvi *.idx *.log *.lot *.out *.toc
