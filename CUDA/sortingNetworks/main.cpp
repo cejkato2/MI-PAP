@@ -129,17 +129,7 @@ int main(int argc, char** argv)
                        (1.0e-6 * (double)arrayLength/dTimeSecs), dTimeSecs, arrayLength, 1, threadCount);
             }
 
-            //shrLog("\nValidating the results...\n");
-            //    shrLog("...reading back GPU results\n");
-            //        cutilSafeCall( cudaMemcpy(h_OutputKeyGPU, d_OutputKey, N * sizeof(uint), cudaMemcpyDeviceToHost) );
-            //        cutilSafeCall( cudaMemcpy(h_OutputValGPU, d_OutputVal, N * sizeof(uint), cudaMemcpyDeviceToHost) );
-            //        int keysFlag = validateSortedKeys(h_OutputKeyGPU, h_InputKey, N / arrayLength, arrayLength, numValues, DIR);
-            //        int valuesFlag = validateValues(h_OutputKeyGPU, h_OutputValGPU, h_InputKey, N / arrayLength, arrayLength);
-            //flag = flag && keysFlag && valuesFlag;
-
-            //shrLog("\n");
         }
-    //shrLog( flag ? "PASSED\n\n" : "FAILED\n\n");
 
     shrLog("Shutting down...\n");
         cutilCheckError( cutDeleteTimer(hTimer) );
