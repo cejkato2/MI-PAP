@@ -230,12 +230,12 @@ void ShearOddeven(int *ha, int row_count,int col_count)
       		cudaSetDevice(max_device);
 		
 		//vystup vlastnosti
-		printf("Device number --> %d\n", num_devices);
-		printf("Multiprocesor count --> %d\n", max_multiprocessors);
-		printf("========================================\n");
-		printf("Vybrane zarizeni --> %d\n", device);
+//		printf("Device number --> %d\n", num_devices);
+//		printf("Multiprocesor count --> %d\n", max_multiprocessors);
+//		printf("========================================\n");
+//		printf("Vybrane zarizeni --> %d\n", device);
 	}
-	printf("Pocet threadu --> %d\n\n",NUM_OF_THREADS);
+//	printf("Pocet threadu --> %d\n\n",NUM_OF_THREADS);
 
 	HANDLE_ERROR(cudaMalloc((void **)&da, dasize));
 	HANDLE_ERROR(cudaMalloc((void **)&dax, dasize));
@@ -250,8 +250,8 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 	dim3 dimGrid(numOfBlocks, 1); //pustime to na pocet bloku (jak jsme spocitali)
 	dim3 dimBlock(xBlkDim,yBlkDim, 1); //a kazdy blok bude mit rozmery
 
-	printf("Pocet bloku-->%d\n",numOfBlocks);
-	printf("Rozmery bloku--> %d radku, %d sloupcu\n",yBlkDim,xBlkDim);
+//	printf("Pocet bloku-->%d\n",numOfBlocks);
+//	printf("Rozmery bloku--> %d radku, %d sloupcu\n",yBlkDim,xBlkDim);
 	// ===== deme na problem =====	
 	int numOfIter;	
 	int sh_iter;
@@ -274,7 +274,7 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 				numOfIter=row_count;
 			}	
 
-		printf("Pocet iteraci %d\n",numOfIter);	
+//		printf("Pocet iteraci %d\n",numOfIter);	
 		for(int iter=0; iter < numOfIter ; iter++){
 			ShearOekern <<< dimGrid, dimBlock >>> (da,dax,row_count,col_count,xBlkDim,act_iter,iter,sh_iter);
 			cudaThreadSynchronize();
@@ -289,7 +289,7 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 	HANDLE_ERROR( cudaEventSynchronize( stop ) );
 	HANDLE_ERROR( cudaEventElapsedTime( &elapsedTime, start, stop ) );
 	printf("\n\n-----------------------------------------------------\n");
-	printf( "GPU čas: %g ms\n", elapsedTime );
+	printf( "GPU čas: %g ms ---> prvku %d\n", elapsedTime,row_count*col_count );
 	printf("-----------------------------------------------------\n\n");
 
 	//uklizeni
@@ -298,5 +298,6 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 
 	//free malocs
 	HANDLE_ERROR(cudaFree(da));
+	HANDLE_ERROR(cudaFree(dax));
 }
 
