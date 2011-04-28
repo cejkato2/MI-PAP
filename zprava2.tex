@@ -61,10 +61,6 @@ Algoritmy byly ve své podstatě navrženy tak, aby co nejlépe seděli možnost
 Tyto části jsou společné pro všechny algoritmy pro CUDA. Zaručují jistou rychlost a škálovatelnost problému.
 
 \section{Popis paralelního algoritmu a jeho implementace v CUDA}
-\subsection{Sudo-lichý mergesort}
-
-\subsection{Bitonic sort}
-
 \subsection{Shearsort}
 Vzhledem k možnosti HW v grafickém akcelerátoru jsme zvolili implementaci pomoci even odd transpozition sortu. Toto využívání je možné zejména díky schopnosti vytvořit velký počet vláken v zařízení (a to,že každý prvek v poli má své vlastní vlákno). Při samotné implementaci bylo dbáno na několik základních pravidel. A to pravidla v úvodní části \ref{sec:reseni}.
 
@@ -74,20 +70,20 @@ Samotný shearsort byl implementován jako kernel, tak veškerá část algoritm
 
 Program si sám spočítá rozložení matice tak, aby se do globální paměti vlezl celý sloupec 2D matice.
 
+\subsection{Sudo-lichý mergesort, Bitonic sort}
+Řešení algoritmů sudo-lichý mergesort a bitonic sort jsme nalezli v ukázkových příkladech, dodávaných společně s SDK, stažitelných
+ze stránek společnosti
+NVIDIA. Jedná se o příklad pojmenovaný \textbf{sortingNetworks}. Spustitelný program, který se v příkladu generoval, prováděl
+řazení pouze algoritmem Bitonic sort. Zdrojový kód v \textbf{main.cpp} jsme proto upravili tak, aby se dal spustit i sudo-lichý mergesort.
+Program nyní očekává při spuštění jeden parametr a to buď \emph{bitonic} nebo \emph{eom} a podle toho se použije řadící algoritmus.
+SortingNetworks jsme přesunuli z adresářové struktury příkladů tak, aby se dal zkompilovat samostatně a nezávisle na příkladech
+a k tomu jsme upravili soubor Makefile.
 
-\section{Naměřené výsledky a vyhodnocení}
+\section{Naměřené výsledky}
 \subsection{Způsob měření}
 Měření bylo prováděno nad daty, které se generovalo pro každý každý problém znova a které samozřejmě do doby běhu algoritmu nebylo započítáno. Měření času bylo prováděno prostředky z CUDA SDK. Pro vyhodnocení jsme zvolili konstatní počet vláken na blok.
 
 \subsection{Naměřené časy}
-
-\subsubsection{Sekvenční Mergesort}
-
-\subsubsection{Sekvenční Even-Odd Mergesort}
-
-
-\subsubsection{Sekvenční Bitonic sort}
-
 \subsubsection{Shearsort}
 \begin{table}[H]
 \begin{center}
@@ -105,27 +101,56 @@ Měření bylo prováděno nad daty, které se generovalo pro každý každý pr
 \end{tabular} 
 \end{center}
 \caption{Shearsort}
-\end{table}
+\end{table} 
 
 \subsubsection{Even-Odd Mergesort}
-
-\subsection{Zrychlení}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|}
+\hline Množství dat (2\textsuperscript{n}) & Čas \\ \hline
+6       &  0.001378000 \\ \hline
+7       &  0.001691000 \\ \hline
+8       &  0.002085000 \\ \hline
+9       &  0.002512000 \\ \hline
+10      &  0.002978000 \\ \hline
+11      &  0.003739000 \\ \hline
+12      &  0.004578000 \\ \hline
+13      &  0.005573000 \\ \hline
+14      &  0.006700000 \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Even-Odd Mergesort}
+\end{table} 
 
 \subsubsection{Bitonic sort}
-\subsubsection{Even-Odd Mergesort}
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|r|r|r|}
+\hline Množství dat (2\textsuperscript{n}) & Čas \\ \hline
+6       &  0.001399000 \\ \hline
+7       &  0.001699000 \\ \hline
+8       &  0.002082000 \\ \hline
+9       &  0.002499000 \\ \hline
+10      &  0.002951000 \\ \hline
+11      &  0.005144000 \\ \hline
+12      &  0.007467000 \\ \hline
+13      &  0.009914000 \\ \hline
+14      &  0.012502000 \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Bitonic sort}
+\end{table} 
 
-\subsection{Shearsort}
 
-\subsection{Vyhodnocení}
+\section{Závěr}
+Po seznámení se se základním principem práce s technologií CUDA jsme začali pracovat na paralelizaci řadících algoritmů touto druhou variantou. Oproti použití technologie OpenMP vyžadovala implementace mnohem větší úsilí, takže jsme stihli realizaci algoritmu shearsort. Naštěstí jsme zbylé dva algoritmy našli v příkladech od společnosti NVIDIA, takže pro měření jsme použili mírně modifikované (co do spouštění) tyto implementace.
+
+Technologie CUDA respektive použitá grafická karta nám umožnila využít mnohem více spuštěných vláken oproti např. OpenMP bez nezanedbatelného zvýšení režie, která s použitím vláken v OS souvisí. 
 \section{Literatura}
 \begin{enumerate}
 \item \href{https://edux.fit.cvut.cz/courses/MI-PAP}{Stránky předmětu MI-PAP}
 \item \href{http://aggregate.org/MAGIC/#GPU SyncBlocks}{\label{cud:synblocks}GPU synblocks}
+\item \href{http://www.root.cz/serialy/uvod-do-technologie-cuda/}{Seriál o technologii CUDA na serveru Root.cz}
 \end{enumerate}
-
-
-\appendix
-\section{Grafy závislosti času na počtu vláken}
-
 
 \end{document}
