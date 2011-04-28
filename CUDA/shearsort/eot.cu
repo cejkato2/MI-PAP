@@ -281,10 +281,9 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 			HANDLE_ERROR(cudaMemcpy(da,dax,dasize,cudaMemcpyDeviceToDevice));
 			}
 	}
-	
+	HANDLE_ERROR(cudaEventRecord( stop, 0 ) );
 	HANDLE_ERROR(cudaMemcpy(ha,da,dasize,cudaMemcpyDeviceToHost));
 	
-	HANDLE_ERROR(cudaEventRecord( stop, 0 ) );
 
 	//zjisteni casu
 	HANDLE_ERROR( cudaEventSynchronize( stop ) );

@@ -1,8 +1,8 @@
 #ifndef CONSTANT_H_
 #define CONSTANT_H_
 
-#define ARRAY_SIZE 32768
-#define MODULE 100
+#define ARRAY_SIZE 65536
+#define MODULE 4096
 
 #define NUM_OF_THREADS 512
 
