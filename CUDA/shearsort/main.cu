@@ -75,7 +75,7 @@ if(ARRAY_SIZE <= NUM_OF_THREADS){
 	//}		
 	
 	//col=(blkCount/row)*NUM_OF_THREADS;	
-	row=NUM_OF_THREADS;
+	row=NUM_OF_THREADS/4;
 	col=ARRAY_SIZE/row;
 }
 
