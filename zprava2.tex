@@ -79,6 +79,9 @@ Program nyní očekává při spuštění jeden parametr a to buď \emph{bitonic
 SortingNetworks jsme přesunuli z adresářové struktury příkladů tak, aby se dal zkompilovat samostatně a nezávisle na příkladech
 a k tomu jsme upravili soubor Makefile.
 
+Dále bylo potřeba odebrat kontrolu stability řazení, protože originální verzi programu nebylo možné měřit pro větší množinu dat.
+Z tohoto důvodu jsme museli odebrat alokaci paměti pro klíče hodnot a tím pádem i odstranit příslušné parametry volaných kernelů.
+
 \section{Naměřené výsledky}
 \subsection{Způsob měření}
 Měření bylo prováděno nad daty, které se generovalo pro každý každý problém znova a které samozřejmě do doby běhu algoritmu nebylo započítáno. Měření času bylo prováděno prostředky z CUDA SDK. Pro vyhodnocení jsme zvolili konstatní počet vláken na blok.
@@ -262,7 +265,7 @@ Technologie CUDA respektive použitá grafická karta nám umožnila využít mn
 \appendix
 \section{Grafy závislosti času na velikosti dat}
 
-\subsection{Měření na posloupnosti čísel o velikosti 2\textsuperscript{26}}
+\subsection{Porovnání algoritmů}
 \subsubsection{EOMergesort, Bitonic sort}
 \begin{figure}[H]
 \begin{center}
@@ -281,7 +284,10 @@ Technologie CUDA respektive použitá grafická karta nám umožnila využít mn
 \end{center}
 \end{figure}
 
-\section{Porovnání CUDA a OpenMP}
+\section{Porovnání technologií CUDA a OpenMP}
+Grafy vznikly použitím hodnot z měření na grafické kartě a vybráním nejlepších hodnot při měření verze pracující s OpenMP.
+Vycházeli jsme z předpokladu, že se snažíme porovnat nejlepší dosažené výsledky implementací algoritmů obou technologií. Proto jsme
+u OpenMP vzali počty vláken podle nejlepšího naměřeného času.
 \subsection{Even-Odd Mergesort}
 \begin{figure}[H]
 \begin{center}
