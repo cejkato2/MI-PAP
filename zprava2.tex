@@ -260,10 +260,10 @@ Technologie CUDA respektive použitá grafická karta nám umožnila využít mn
 \end{enumerate}
 
 \appendix
-\section{Grafy závislosti času na počtu vláken}
+\section{Grafy závislosti času na velikosti dat}
 
 \subsection{Měření na posloupnosti čísel o velikosti 2\textsuperscript{26}}
-\subsubsection{Čas}
+\subsubsection{EOMergesort, Bitonic sort}
 \begin{figure}[H]
 \begin{center}
 \includegraphics[width=14cm]{cuda-eom-bit.jpg}
@@ -272,7 +272,7 @@ Technologie CUDA respektive použitá grafická karta nám umožnila využít mn
 \end{center}
 \end{figure}
 
-\subsubsection{Čas}
+\subsubsection{Shearsort}
 \begin{figure}[H]
 \begin{center}
 \includegraphics[width=14cm]{cuda-shearsort.jpg}
@@ -281,5 +281,21 @@ Technologie CUDA respektive použitá grafická karta nám umožnila využít mn
 \end{center}
 \end{figure}
 
+\section{Porovnání CUDA a OpenMP}
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=14cm]{eom-cudavsomp.jpg}
+\caption{EOMergesort}
+\label{fig:eom-cuda-vs-omp}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=14cm]{bit-cudavsomp.jpg}
+\caption{Bitonic sort}
+\label{fig:bit-cuda-vs-omp}
+\end{center}
+\end{figure}
 
 \end{document}
