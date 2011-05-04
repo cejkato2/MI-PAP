@@ -47,6 +47,11 @@ void printArray(int a[],int row,int col)
 
 int main(int argc, char** argv)
 {
+
+int ARRAY_SIZE = 16;
+
+for(int tmp=4;tmp<26;ARRAY_SIZE*=2,tmp++){
+
 int* a = new int[ARRAY_SIZE];
 
 generateArray(a, ARRAY_SIZE);
@@ -54,6 +59,7 @@ generateArray(a, ARRAY_SIZE);
 //pocet radku a sloupcu problemu
 int col;
 int row; 
+
 
 if(ARRAY_SIZE <= NUM_OF_THREADS){
 	//nema cenu delit problem
@@ -69,7 +75,7 @@ if(ARRAY_SIZE <= NUM_OF_THREADS){
 	//}		
 	
 	//col=(blkCount/row)*NUM_OF_THREADS;	
-	row=NUM_OF_THREADS/8;
+	row=NUM_OF_THREADS/4;
 	col=ARRAY_SIZE/row;
 }
 
@@ -84,6 +90,6 @@ ShearOddeven(a,row,col);
 #ifdef DEBUG_GLOBAL
 printArray(a,row,col);
 #endif
-
+}
 return 0;
 }

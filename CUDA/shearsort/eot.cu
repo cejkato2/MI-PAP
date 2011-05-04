@@ -6,8 +6,6 @@
 #include "constant.h"
 #include <math.h>
 #include "utils/cuda_comparer.cu" //komparator pro cudu
-#include <utils/cuda_syn_block.cu> //synchronizace napric barierama -- prasarna vkladat primo ceckovy kod, ale :
-//You must define __device__ functions within the compilation unit they are called in, and their behavior similar to functions declared with the c++ inline keyword.
 
 
 // compare and swap; copies from the f to t, swapping f[i] and
@@ -115,7 +113,7 @@ iter - aktualni iterace
 barnos - pomocne pole pro synchro mezi bloky
 blkDimX - dimense X bloku
 */
-__global__ void ShearOekern(int *h_da, volatile unsigned int* barnos, int row_size, int col_size,int blkDimX)
+__global__ void ShearOekern(int *h_da,int* h_dax, int row_size, int col_size,int blkDimX,int act_iter,int iter, int sh_iter)
 {
 //vypocet souradnice X a Y
 	int tix=threadIdx.x;
@@ -133,119 +131,77 @@ __global__ void ShearOekern(int *h_da, volatile unsigned int* barnos, int row_si
 	__shared__ int sData[NUM_OF_THREADS]; //alokace lokalni pameti
 	__shared__ int sData_aux[NUM_OF_THREADS]; //temp datove pole
 	sData[localId] = h_da[d_index]; //prekopiruji si data do lokalni pameti
-
-	int numOfPhases = 2 * ((int)floor(log2((float)row_size))) + 1; //pocet iteraci shearsortu
+	sData_aux[localId] = sData[localId];
 	////////// DEBUG ///////////
-// 	h_da[d_index] = d_index;	
+//	h_da[d_index] = localId;	
 //	h_da[d_index] = x;
 //	h_da[d_index] = y;
 
-	for(int act_iter=0; act_iter < numOfPhases; act_iter++){
-	//2) Pockame, az to udelaji vsichni ve vsech blocich
-		__syncblocks(barnos); 
-
-		//urceni faze --> podle aktualni iterace
-		int sh_iter;
-		if((act_iter%2)==0){
-			sh_iter=SH_ROW;
-		}else{
-			sh_iter=SH_COL;
-		}	
+	__syncthreads();
 	
-	//3) N-krat budeme opakovat transpozice nad svou casti dat
-	//Pozn. : SL liche jsou v ramci sdilene pameti. U LS musi krajni vlakna komunikovat prez globalni pamet.
-		unsigned int iter;
-		unsigned int phase; //SL nebo LS faze porovnani
-		int dir; //smer razeni
-       		int numOfIter;
+	unsigned int phase; //SL nebo LS faze porovnani
+	int dir; //smer razeni
 
-		//vyber poctu iteraci	
+		//urci fazi -> podle tveho radku
+		if((iter%2) == 0){
+			phase = SL;
+		}else{
+			phase = LS;
+		}
+	
+		//urci smer razeni
 		if(sh_iter == SH_ROW){
-			numOfIter=col_size;
-		}else{
-			numOfIter=row_size;
-		}	
-
-		for(iter=0; iter < numOfIter ; iter++){ 
-	
-			//urci fazi -> podle tveho radku
-			if((iter%2) == 0){
-				phase = SL;
-			}else{
-				phase = LS;
-			}
-	
-			//urci smer razeni
-			if(sh_iter == SH_ROW){
-				if((y%2) == 0){
-					dir=ASCENDIG;
-				}else{
-					dir=DESCENDING;
-				}
-			}else{
+			if((y%2) == 0){
 				dir=ASCENDIG;
+			}else{
+				dir=DESCENDING;
 			}
+		}else{
+			dir=ASCENDIG;
+		}
 					
-	
 			
-			if(sh_iter == SH_ROW){
-				if(phase == SL){
-				//provadej SL vymenu
-					if( (tix%2) == 0){
-						cas_row(sData, sData_aux, h_da, tix, tix+1, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
-					}else{
-						cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
-					}
+		if(sh_iter == SH_ROW){
+			if(phase == SL){
+			//provadej SL vymenu
+				if( (tix%2) == 0){
+					cas_row(sData, sData_aux, h_da, tix, tix+1, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
 				}else{
-				//provadej LS vymenu => zacina se zde v prvni iteraci
-					if( (tix%2) == 1){
-						cas_row(sData, sData_aux, h_da, tix,tix+1, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
-					}else{
-						cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
-					}
+					cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
 				}
 			}else{
-			//SH_COLUMN faze
-				if(phase == SL){
-					if((tiy%2) == 0){
-						cas_col(sData, sData_aux, localId, localId+blkDimX, NUM_OF_THREADS, localId);	
-					}else{
-						cas_col(sData, sData_aux, localId-blkDimX, localId, NUM_OF_THREADS, localId);
-					}
+			//provadej LS vymenu => zacina se zde v prvni iteraci
+				if( (tix%2) == 1){
+					cas_row(sData, sData_aux, h_da, tix,tix+1, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
 				}else{
-					if((tiy%2) == 1){
-						cas_col(sData, sData_aux, localId, localId+blkDimX, NUM_OF_THREADS, localId);
-					}else{
-						cas_col(sData, sData_aux, localId-blkDimX, localId, NUM_OF_THREADS, localId);
-					}
+					cas_row(sData, sData_aux, h_da, tix-1, tix, col_size, tix, phase, dir, x, d_index,localId, col_size, blkDimX);
 				}
 			}
-	//4) Do	koncili jsme jednu vymenu, pockame na vsechny bloky a krajni vlakna osvezi data na svojich pozicich v globalni pameti
-		__syncblocks(barnos); //pockame az vsichni dodelaji krok
-		
-		//pouze krajni reprezentanti udelaji atualizace v globalni pameti
-		if(tix==0 || tix==(NUM_OF_THREADS-1)){
-			h_da[d_index] = sData_aux[localId]; 
+		}else{
+		//SH_COLUMN faze
+			if(phase == SL){
+				if((tiy%2) == 0){
+					cas_col(sData, sData_aux, localId, localId+blkDimX, NUM_OF_THREADS, localId);	
+				}else{
+					cas_col(sData, sData_aux, localId-blkDimX, localId, NUM_OF_THREADS, localId);
+				}
+			}else{
+				if((tiy%2) == 1){
+					cas_col(sData, sData_aux, localId, localId+blkDimX, NUM_OF_THREADS, localId);
+				}else{
+					cas_col(sData, sData_aux, localId-blkDimX, localId, NUM_OF_THREADS, localId);
+				}
+			}
 		}
 	
-		sData[localId]=sData_aux[localId]; //kazde vlakno si navic osvezi sva data z temp pole
-
-		//prubezne kopirovani do globalni pamet
-		#ifdef DEBUG_GLOBAL	
-		h_da[d_index] = sData[localId];	
-		#endif	
-	
-		__syncblocks(barnos); //a pokracovaudaMemcpy(da,daaux,dasize,cudaMemcpyDeviceToDevice);t budeme, az toto dokoci vsechny vlakna ve vsech blocich	
-		}
-	}
-//5) Ukonceno N iteraci ---> nakopirujeme data do globalni pameti
-	h_da[d_index] = sData[localId]; 
+	__syncthreads();
+	h_dax[d_index] = sData_aux[localId];
 }
 
 
 void ShearOddeven(int *ha, int row_count,int col_count)
 {
-	int *da;
+	int *da,*dax;
 	int n = row_count*col_count;
 	int dasize = n * sizeof(int);
 	//mereni casu
@@ -274,52 +230,66 @@ void ShearOddeven(int *ha, int row_count,int col_count)
       		cudaSetDevice(max_device);
 		
 		//vystup vlastnosti
-		printf("Device number --> %d\n", num_devices);
-		printf("Multiprocesor count --> %d\n", max_multiprocessors);
-		printf("========================================\n");
-		printf("Vybrane zarizeni --> %d\n", device);
+//		printf("Device number --> %d\n", num_devices);
+//		printf("Multiprocesor count --> %d\n", max_multiprocessors);
+//		printf("========================================\n");
+//		printf("Vybrane zarizeni --> %d\n", device);
 	}
-	printf("Pocet threadu --> %d\n\n",NUM_OF_THREADS);
+//	printf("Pocet threadu --> %d\n\n",NUM_OF_THREADS);
 
 	HANDLE_ERROR(cudaMalloc((void **)&da, dasize));
+	HANDLE_ERROR(cudaMalloc((void **)&dax, dasize));
 	HANDLE_ERROR(cudaMemcpy(da, ha, dasize, cudaMemcpyHostToDevice));
-	// the array daaux will serve as "scratch space"
 	
 	int xBlkDim = NUM_OF_THREADS/row_count; //x rozmer bloku
 	int yBlkDim = row_count;
 	int xMatrix = col_count; //x rozmer matice	
 	int numOfBlocks = (int) ceil(xMatrix/xBlkDim); //pocet bloku
 	
-	// ===== alokuj pole pro synchro =====
-	unsigned int* h_barnos = new unsigned int[numOfBlocks]; //pomocne pole
-	//inicializuj pole cislem 0
-	for(int i=0;i<numOfBlocks;i++)	h_barnos[i] = 0;
-	
-	volatile unsigned int* barnos; //nase promenna, kterou budem ladovat cudu
-	HANDLE_ERROR(cudaMalloc((void **) &barnos, sizeof(int)*numOfBlocks)); //alokujem si na to mistecko
-	HANDLE_ERROR(cudaMemcpy((void*)barnos,h_barnos, sizeof(int)*numOfBlocks,cudaMemcpyHostToDevice)); //naládujem pole
-	
-	delete[] h_barnos; //a uklidime po sobe	pole,co nepotrebujeme				
-
 	// ===== priprav sturkturu pro deleni problemu =====
 	dim3 dimGrid(numOfBlocks, 1); //pustime to na pocet bloku (jak jsme spocitali)
 	dim3 dimBlock(xBlkDim,yBlkDim, 1); //a kazdy blok bude mit rozmery
 
-	printf("Pocet bloku-->%d\n",numOfBlocks);
-	printf("Rozmery bloku--> %d radku, %d sloupcu\n",yBlkDim,xBlkDim);
+//	printf("Pocet bloku-->%d\n",numOfBlocks);
+//	printf("Rozmery bloku--> %d radku, %d sloupcu\n",yBlkDim,xBlkDim);
 	// ===== deme na problem =====	
+	int numOfIter;	
+	int sh_iter;
+	int numOfPhases = 2 * ((int)floor(log2((float)row_count))) + 1; //pocet iteraci shearsortu
+	//int numOfPhases=1;
 	HANDLE_ERROR( cudaEventRecord( start, 0 ) );
-	ShearOekern <<< dimGrid, dimBlock >>> (da, barnos, row_count, col_count,xBlkDim); //shearsort
-	cudaThreadSynchronize();
+	
+	for(int act_iter=0; act_iter < numOfPhases; act_iter++){
+		
+			if((act_iter%2)==0){
+				sh_iter=SH_ROW;
+			}else{
+				sh_iter=SH_COL;
+			}
+		
+			//vyber poctu iteraci
+			if(sh_iter == SH_ROW){
+				numOfIter=col_count;
+			}else{
+				numOfIter=row_count;
+			}	
+
+//		printf("Pocet iteraci %d\n",numOfIter);	
+		for(int iter=0; iter < numOfIter ; iter++){
+			ShearOekern <<< dimGrid, dimBlock >>> (da,dax,row_count,col_count,xBlkDim,act_iter,iter,sh_iter);
+			cudaThreadSynchronize();
+			HANDLE_ERROR(cudaMemcpy(da,dax,dasize,cudaMemcpyDeviceToDevice));
+			}
+	}
+	HANDLE_ERROR(cudaEventRecord( stop, 0 ) );
 	HANDLE_ERROR(cudaMemcpy(ha,da,dasize,cudaMemcpyDeviceToHost));
 	
-	HANDLE_ERROR( cudaEventRecord( stop, 0 ) );
 
 	//zjisteni casu
 	HANDLE_ERROR( cudaEventSynchronize( stop ) );
 	HANDLE_ERROR( cudaEventElapsedTime( &elapsedTime, start, stop ) );
 	printf("\n\n-----------------------------------------------------\n");
-	printf( "GPU čas: %g ms\n", elapsedTime );
+	printf( "GPU čas: %g ms ---> prvku %d\n", elapsedTime,row_count*col_count );
 	printf("-----------------------------------------------------\n\n");
 
 	//uklizeni
@@ -328,6 +298,6 @@ void ShearOddeven(int *ha, int row_count,int col_count)
 
 	//free malocs
 	HANDLE_ERROR(cudaFree(da));
-	HANDLE_ERROR(cudaFree((void *) barnos));
+	HANDLE_ERROR(cudaFree(dax));
 }
 
