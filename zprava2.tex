@@ -89,6 +89,27 @@ Měření bylo prováděno nad daty, které se generovalo pro každý každý pr
 \begin{center}
 \begin{tabular}{|r|r|r|}
 \hline Množství dat (2\textsuperscript{n}) & Čas \\ \hline
+\begin{comment}
+4   0.000200800
+5   0.000282080
+6   0.000556640
+7   0.001100000
+8   0.002022474
+9   0.007240000
+10  0.014284000
+11  0.016643200
+12  0.019943290
+13  0.027145500
+14  0.043032042
+15  0.093929000
+16  0.215102000
+17  0.702910000
+18  2.339670000
+19  8.812000000
+20  35.23100000
+21  166.1040000
+22  652.323000 
+\end{comment}
 4       &  0.000200800 \\ \hline
 5       &  0.000282080 \\ \hline
 6       &  0.000556640 \\ \hline
@@ -237,5 +258,28 @@ Technologie CUDA respektive použitá grafická karta nám umožnila využít mn
 \item \href{http://aggregate.org/MAGIC/#GPU SyncBlocks}{\label{cud:synblocks}GPU synblocks}
 \item \href{http://www.root.cz/serialy/uvod-do-technologie-cuda/}{Seriál o technologii CUDA na serveru Root.cz}
 \end{enumerate}
+
+\appendix
+\section{Grafy závislosti času na počtu vláken}
+
+\subsection{Měření na posloupnosti čísel o velikosti 2\textsuperscript{26}}
+\subsubsection{Čas}
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=14cm]{cuda-eom-bit.jpg}
+\caption{Graf závislosti času na velikosti dat EOMergesort, Bitonic sort}
+\label{fig:cuda-eom-bit}
+\end{center}
+\end{figure}
+
+\subsubsection{Čas}
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=14cm]{cuda-shearsort.jpg}
+\caption{Graf závislosti času na velikosti dat Shearsort}
+\label{fig:cuda-shearsort}
+\end{center}
+\end{figure}
+
 
 \end{document}
